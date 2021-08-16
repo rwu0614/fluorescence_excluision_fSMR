@@ -33,6 +33,7 @@ Peak.start = cell(1, n_pmt_channel);
 Peak.end = cell(1, n_pmt_channel);
 Peak.count = cell(1, n_pmt_channel);
 Peak.amplitude = cell(1, n_pmt_channel);
+Peak.amp_over_base = cell(1, n_pmt_channel);
 Peak.location = cell(1, n_pmt_channel);
 Peak.time = cell(1, n_pmt_channel);
 Peak.width = cell(1, n_pmt_channel);
@@ -64,8 +65,10 @@ t = rawdata_time_pmt(idx_rangeofinterest);
 
 % Nomarlize each channel by its median to remove channel-dependent
 % baseline voltage difference
-Data.normalized = cellfun(@(x) x-median(x),Data.read,...
-    'UniformOutput',false);
+
+% Data.normalized = cellfun(@(x) x-median(x),Data.read,...
+%     'UniformOutput',false);
+Data.normalized = Data.read;
 
 %===== Apply median filter then moving-average filter =============%
 
@@ -120,14 +123,14 @@ for i = 1:n_pmt_channel
     % compute noise of baseline by taking the differential of baseline and
     % remove 2.5% of lower and higher outliers, and take standard deviation
     noise_data_keep = rmoutliers(diff(Data.normalized{1,i}),'percentiles',[1,99]);
-    Process.peak_threshold{i}= Process.baseline{i} + detect_thresh_pmt(i)*std(noise_data_keep);
+    Process.peak_threshold{i}= Process.baseline{i} - detect_thresh_pmt(i)*std(noise_data_keep);
 %     histogram(diff(Data.normalized{1,i}));legend(num2str(detect_thresh_pmt(i)*std(noise_data_keep)))
 %     hold on
 %     histogram(noise_data_keep)
 %     input('check')
 end
 
-Process.peak_indices = cellfun(@(x,y) find(x > y), Data.filtered_med, Process.peak_threshold,"UniformOutput",false);
+Process.peak_indices = cellfun(@(x,y) find(x < y), Data.filtered_med, Process.peak_threshold,"UniformOutput",false);
 
 
 
@@ -194,14 +197,17 @@ while (exitflag ~=1)
 
     maxrange = max(tempstart,1):min(tempend, x_axis_Ind(end));
     plotrange = max(tempstart-uni_peak_baseline_window_size,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
+    %plotrange = max(tempend,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end)); % to correct for scattering on the left side
     local_baseline = cellfun(@(x) median(x(setxor(plotrange, maxrange))),Data.filtered_med);
 
     i=seg_num_peaks;
 
     for channel = 1:n_pmt_channel
-        [Peak.amplitude{channel}(i), Peak.location{channel}(i)] = cellfun(@(x) max(x(maxrange)), Data.filtered_med_ave(channel));
+         [Peak.amplitude{channel}(i), Peak.location{channel}(i)] = cellfun(@(x) min(x(maxrange)), Data.filtered_med_ave(channel));
+%     [Peak.amplitude{channel}(i), Peak.location{channel}(i)] = cellfun(@(x) min(x(maxrange)), Data.normalized(channel));
         Peak.location{channel}(i) = Peak.location{channel}(i) + maxrange(1) - 1;
-        Peak.amplitude{channel}(i) = Peak.amplitude{channel}(i) - local_baseline(channel); %correct for local baseline
+        Peak.amplitude{channel}(i) =  local_baseline(channel) - Peak.amplitude{channel}(i); %correct for local baseline
+        Peak.amp_over_base{channel}(i) = Peak.amplitude{channel}(i)/local_baseline(channel); %for fluorescence exclusion volume
         Peak.time{channel}(i)=t(Peak.location{channel}(i));
         Peak.width{channel}(i)= length(maxrange);
         Peak.baseline{channel}(i) = local_baseline(channel) + median(Data.read{channel}); 
@@ -233,7 +239,7 @@ while (exitflag ~=1)
 %                 plot(plotrange, Data.filtered_med{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
                 plot(plotrange, Data.normalized{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
                 plot(maxrange, Data.filtered_med_ave{channel}(maxrange)-local_baseline(channel), '-r');
-                plot(Peak.location{channel}(i), Peak.amplitude{channel}(i), 'or');
+                plot(Peak.location{channel}(i), -Peak.amplitude{channel}(i), 'or');
                 plot(plotrange, zeros(1,length(plotrange)), 'k-');
                 hold off;
                 if channel ==plotspace.n_col(end)
@@ -267,7 +273,7 @@ end
 %% Generate output
 
 readout_pmt.time_of_detection = Peak.time_of_detection;
-readout_pmt.amplitude=Peak.amplitude;
+readout_pmt.amplitude=Peak.amp_over_base;
 readout_pmt.location = cellfun(@(x) x + elapsed_index,Peak.location,"UniformOutput",false);
 readout_pmt.baseline=Peak.baseline;
 

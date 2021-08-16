@@ -22,11 +22,11 @@ addpath('plotting_functions\');
     analysis_params.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
     
     %calcien+annexin detection stragety: prioritize calcien
-    analysis_params.detect_thresh_pmt(1) = 2; 
+    analysis_params.detect_thresh_pmt(1) = 5; 
     analysis_params.detect_thresh_pmt(2) = 2; 
-    analysis_params.detect_thresh_pmt(3) = 2;
-    analysis_params.detect_thresh_pmt(4) = 2;
-    analysis_params.detect_thresh_pmt(5) = 2;
+    analysis_params.detect_thresh_pmt(3) = 5;
+    analysis_params.detect_thresh_pmt(4) = 5;
+    analysis_params.detect_thresh_pmt(5) = 5;
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -123,7 +123,7 @@ while(flag==0)
     
     % read raw pmt and time file
     for channel = 1:n_pmt_channel
-        rawdata_pmt{1,channel} = -1*fread(pmt_file_ID(channel),datasize,'float64=>double');
+        rawdata_pmt{1,channel} = fread(pmt_file_ID(channel),datasize,'float64=>double');
     end
     rawdata_time_pmt = fread(time_file_ID,datasize,'float64=>double');
     

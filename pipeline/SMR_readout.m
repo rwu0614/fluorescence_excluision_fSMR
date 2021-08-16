@@ -159,7 +159,7 @@ S3_Merge;
 save('data.mat', 'datasmr');    
 %Run select_smrpeaks_fast to filter out bad peaks and save filtered matrix
 select_smrpeaks_fast;
-save('data.mat', 'datasmr_good');    
+%save('data.mat', 'datasmr_good');    
 %=================================================================%
 
 
