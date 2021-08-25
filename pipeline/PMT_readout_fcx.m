@@ -23,7 +23,7 @@ addpath('plotting_functions\');
     
     %calcien+annexin detection stragety: prioritize calcien
     analysis_params.detect_thresh_pmt(1) = 5; 
-    analysis_params.detect_thresh_pmt(2) = 2; 
+    analysis_params.detect_thresh_pmt(2) = 5; 
     analysis_params.detect_thresh_pmt(3) = 5;
     analysis_params.detect_thresh_pmt(4) = 5;
     analysis_params.detect_thresh_pmt(5) = 5;

@@ -49,7 +49,7 @@ end
 
 %% ================== estimated data points per frequency peak & noise in system ==============
 %added 03/22/2019
-estimated_datapoints = 200; %for full transit; deafult
+estimated_datapoints = 350; %for full transit; deafult
 estimated_noise = 1.78; %Hz
 
 
