@@ -196,8 +196,8 @@ while (exitflag ~=1)
     [Peak, tempstart, tempend] = P2_find_pmt_peaks(Peak,uni_peak_range_ext);
 
     maxrange = max(tempstart,1):min(tempend, x_axis_Ind(end));
-    plotrange = max(tempstart-uni_peak_baseline_window_size,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
-    %plotrange = max(tempend,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end)); % to correct for scattering on the left side
+    %plotrange = max(tempstart-uni_peak_baseline_window_size,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
+    plotrange = max(tempend,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end)); % to correct for scattering on the left side
     left_base_range = max(tempstart-uni_peak_baseline_window_size,1):tempstart;
     right_base_range = tempend:min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
     local_baseline = cellfun(@(x) median(x(setxor(plotrange, maxrange))),Data.filtered_med);
