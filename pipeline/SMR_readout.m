@@ -131,7 +131,9 @@ datafull = zeros(13,1); %total of 13 features
 %variable)
 loop=0;
 while(1)
-    
+%     if loop ==2
+%         loop = loop+2;
+%     end
     % Creat a column vector of the frequency data in the current block being analyzed  
     rawdata_smr_current = rawdata_smr([loop*datasize+1:min(length(rawdata_smr), (loop+1)*datasize)]);
     % Creat a column vector of the time data in the current block being analyzed 
