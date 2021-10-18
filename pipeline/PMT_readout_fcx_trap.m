@@ -166,30 +166,34 @@ readout_pmt.baseline_left_height = baseline_left_height;
 readout_pmt.baseline_right_height =baseline_right_height;
 
 %%
-thresh_baselineDiff_over_sig = 0.02; % cutoff for left-right baseline height difference normalized by the signal amplitude
-thresh_base_slope = 0.0001; % cutoff for left-right baseline slopes
+thresh_baselineDiff_over_sig = 0.08; % cutoff for left-right baseline height difference normalized by the signal amplitude
+thresh_base_slope = 0.00004; % cutoff for left-right baseline slopes
 
 all_cell_baselineDiff_over_sig = abs(baseline_left_height-baseline_right_height)./voltage_pmt2;
-all_cell_baselineDiff_over_sig = all_cell_baselineDiff_over_sig(all_cell_baselineDiff_over_sig<1);
+%all_cell_baselineDiff_over_sig = all_cell_baselineDiff_over_sig(all_cell_baselineDiff_over_sig<1);
 base_diff_pass_ind =  find(all_cell_baselineDiff_over_sig < thresh_baselineDiff_over_sig);
 base_leftslope_pass_ind = find(abs(baseline_left_slope) < thresh_base_slope);
 base_rightslope_pass_ind = find(abs(baseline_right_slope) < thresh_base_slope);
 
 cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
 
+%%
+histogram(all_cell_baselineDiff_over_sig,50)
+scatter(all_cell_baselineDiff_over_sig,baseline_left_slope')
 
 %%
 ex_x = readout_pmt.time_of_detection(cell_pass_ind);
 ex_x = ex_x-ex_x(1);
 
 ex_y = readout_pmt.voltage_pmt2(cell_pass_ind);
-
+% ex_y_base = medfilt1(ex_y,10);
+% ex_y = ex_y-ex_y_base;
 %cell_1_ind = find(ex_x>0&ex_x<200&ex_y>100);
 %cell_1_ind = find(ex_x>200&ex_x<325&ex_y>0);
-cell_1_ind = find(ex_x>00&ex_x<60&ex_y>0&ex_y<700);
+cell_1_ind = find(ex_x>0&ex_x<250&ex_y>60&ex_y<150);
 %cell_1_ind = find(ex_x>2000&ex_x<2200&ex_y>100&ex_y<400);
 
-cell_1_ind = cell_1_ind(1:2:end);
+cell_1_ind = cell_1_ind(1:1:end);
 cell_1_x = ex_x(cell_1_ind);
 cell_1_y = ex_y(cell_1_ind);
 

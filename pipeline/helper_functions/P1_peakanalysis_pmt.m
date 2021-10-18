@@ -222,9 +222,17 @@ while (exitflag ~=1)
         Peak.baseline_right_slope{channel}(i) = right_base_fit(1);
         Peak.baseline_left_height{channel}(i) = median(Data.normalized{channel}(left_base_range));
         Peak.baseline_right_height{channel}(i) = median(Data.normalized{channel}(right_base_range));
+
         
     end
-    
+    if analysis_mode==0
+       disp("left_base_fit") 
+       disp(left_base_fit)
+       disp("right_base_fit") 
+       disp(left_base_fit)
+       disp("base height diff") 
+       disp(abs(Peak.baseline_left_height{2}(i)-Peak.baseline_right_height{2}(i))/Peak.amp_over_base{2}(i))
+    end
 %     Peak.baseline_left_slope{2}(i)
 %     Peak.baseline_right_slope{2}(i)
 %     abs(Peak.baseline_left_height{2}(i)-Peak.baseline_right_height{2}(i))/Peak.amplitude{2}(i)
@@ -254,6 +262,8 @@ while (exitflag ~=1)
             subplot(plotspace.n_col,plotspace.n_row,plotspace.peak(channel));
 %                 plot(plotrange, Data.filtered_med{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
                 plot(plotrange, Data.normalized{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
+                plot(left_base_range, Data.normalized{channel}(left_base_range)-local_baseline(channel), '.', 'color', 'yellow'); hold on;
+                plot(right_base_range, Data.normalized{channel}(right_base_range)-local_baseline(channel), '.', 'color', 'yellow'); hold on;
                 plot(maxrange, Data.filtered_med_ave{channel}(maxrange)-local_baseline(channel), '-r');
                 plot(Peak.location{channel}(i), -Peak.amplitude{channel}(i), 'or');
                 plot(plotrange, zeros(1,length(plotrange)), 'k-');
@@ -280,9 +290,11 @@ while (exitflag ~=1)
     if sum([Peak.count{:}])==0
         exitflag = 1;
     end
-    
     if analysis_mode==0
-    input('Next?');
+        pass = input('pass? yes-1,no-0');
+        if pass==0
+            Peak.time_of_detection(i)=-1;
+        end
     end
 end
 

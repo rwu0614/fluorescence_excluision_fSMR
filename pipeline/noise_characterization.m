@@ -37,23 +37,26 @@ end
 
 % seek data for current segement, datatype int is 8bytes
 
-fseek(pmt_file_ID(1),2000000, 'bof');
+fseek(pmt_file_ID(1),4000000, 'bof');
 
     
 rawdata_pmt= fread(pmt_file_ID(1),2000000,'float64=>double');
 %% Noise characterization
+segment_size = 100000;
+rawdata_pmt = rawdata_pmt(end-segment_size:end);
 baseline = median(rawdata_pmt);
 x_norm = rawdata_pmt - median(rawdata_pmt);
 noise_level = rms(x_norm);
+disp(baseline)
 disp(noise_level)
-
+% disp(noise_level/baseline)
 %% filtering
 figure(1)
 med_filt_length = 300;
 x_medfilt = medfilt1(x_norm,med_filt_length);
 
 %Ploting
-plot(x_norm)
+plot(rawdata_pmt)
 hold on
 plot(x_medfilt)
 

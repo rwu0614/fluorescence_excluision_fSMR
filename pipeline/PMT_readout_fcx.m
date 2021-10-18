@@ -11,7 +11,7 @@ addpath('plotting_functions\');
 % Optimize using following parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Peak_length = 100; % estimated peak length
-    datasize = 2e4;   % establish a segment size (~32Mbytes)
+    datasize = 2e5;   % establish a segment size (~32Mbytes)
     
     analysis_params.Baseline_rough_cutoff = -20; % default is -20 for populational fSMR experiments where light source is always on
     analysis_params.med_filt_length = 5; %full PMT data median filter window size, default 50
@@ -22,11 +22,11 @@ addpath('plotting_functions\');
     analysis_params.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
     
     %calcien+annexin detection stragety: prioritize calcien
-    analysis_params.detect_thresh_pmt(1) = 5; 
-    analysis_params.detect_thresh_pmt(2) = 5; 
-    analysis_params.detect_thresh_pmt(3) = 5;
-    analysis_params.detect_thresh_pmt(4) = 5;
-    analysis_params.detect_thresh_pmt(5) = 5;
+    analysis_params.detect_thresh_pmt(1) = 10; 
+    analysis_params.detect_thresh_pmt(2) = 10; 
+    analysis_params.detect_thresh_pmt(3) = 10;
+    analysis_params.detect_thresh_pmt(4) = 10;
+    analysis_params.detect_thresh_pmt(5) = 10;
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -168,4 +168,15 @@ cd(currentFolder)
 report_dir = [input_info.pmt_dir{1} '\' sample_name '_report\PMT_report\'];
 mkdir(report_dir)
 PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, analysis_params, readout_pmt);
+
+%% for 8um megnetic bead calibration
+% total_population = readout_pmt.voltage_pmt2;
+% hist(total_population,100)
+% upper_bound = input("Upper bound is? \n");
+% lower_bound = input("Lower bound is? \n");
+% bead_population = total_population(total_population>lower_bound&total_population>upper_bound);
+% bead_volume = 268.08257*0.001; %um3 to pl of an 8 um bead
+% PMT_to_pL_conversion_factor = bead_volume/median(bead_population);
+% fprintf("PMT_to_pL_conversion_factor is %10.10f\n",PMT_to_pL_conversion_factor);
+
 

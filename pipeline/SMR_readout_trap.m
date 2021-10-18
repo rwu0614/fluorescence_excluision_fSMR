@@ -241,5 +241,9 @@ scaling_factor = BM_beads/median(mass_transit_fil_datafull(2,:));
 
 % chip from 04/12/21 scaling factor is 0.60779
  
- 
+%%
+time = datasmr_good(:,1)-datasmr_good(1,1);
+mass = 0.59*datasmr_good(:,6);
+figure(2)
+scatter(time/60,mass,10,"filled")
  

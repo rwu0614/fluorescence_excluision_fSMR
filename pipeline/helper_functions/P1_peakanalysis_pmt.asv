@@ -196,8 +196,8 @@ while (exitflag ~=1)
     [Peak, tempstart, tempend] = P2_find_pmt_peaks(Peak,uni_peak_range_ext);
 
     maxrange = max(tempstart,1):min(tempend, x_axis_Ind(end));
-    %plotrange = max(tempstart-uni_peak_baseline_window_size,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
-    plotrange = max(tempend,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end)); % to correct for scattering on the left side
+    plotrange = max(tempstart-uni_peak_baseline_window_size,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
+    %plotrange = max(tempend,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end)); % to correct for scattering on the left side
     left_base_range = max(tempstart-uni_peak_baseline_window_size,1):tempstart;
     right_base_range = tempend:min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end));
     local_baseline = cellfun(@(x) median(x(setxor(plotrange, maxrange))),Data.filtered_med);
@@ -224,7 +224,14 @@ while (exitflag ~=1)
         Peak.baseline_right_height{channel}(i) = median(Data.normalized{channel}(right_base_range));
         
     end
-    
+    if analysis_mode==0
+       disp("left_base_fit") 
+       disp(left_base_fit)
+       disp("right_base_fit") 
+       disp(left_base_fit)
+       disp("base height diff") 
+       disp(abs(Peak.baseline_left_height{channel}(i)-Peak.baseline_right_height{channel}(i))/Peak.amp_over_base{channel}(i))
+    end
 %     Peak.baseline_left_slope{2}(i)
 %     Peak.baseline_right_slope{2}(i)
 %     abs(Peak.baseline_left_height{2}(i)-Peak.baseline_right_height{2}(i))/Peak.amplitude{2}(i)
@@ -253,7 +260,8 @@ while (exitflag ~=1)
                 end
             subplot(plotspace.n_col,plotspace.n_row,plotspace.peak(channel));
 %                 plot(plotrange, Data.filtered_med{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
-                plot(plotrange, Data.normalized{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
+                plot(plotrange, Data.normalized{channel}(plotrange)-(channel), '.', 'color', 'blue'); hold on;
+                plot(left_base_range, Data.normalized{channel}(left_base_range)-(channel), '.', 'color', 'blue'); hold on;
                 plot(maxrange, Data.filtered_med_ave{channel}(maxrange)-local_baseline(channel), '-r');
                 plot(Peak.location{channel}(i), -Peak.amplitude{channel}(i), 'or');
                 plot(plotrange, zeros(1,length(plotrange)), 'k-');
@@ -280,9 +288,11 @@ while (exitflag ~=1)
     if sum([Peak.count{:}])==0
         exitflag = 1;
     end
-    
     if analysis_mode==0
-    input('Next?');
+        pass = input('pass? yes-1,no-0');
+    end
+    if pass==0
+        Peak.time_of_detection(i)=-1;
     end
 end
 
