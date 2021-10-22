@@ -199,15 +199,6 @@ readout_pmt.voltage_pmt3 = voltage_pmt3*1000;
 readout_pmt.voltage_pmt4 = voltage_pmt4*1000;
 readout_pmt.voltage_pmt5 = voltage_pmt5*1000;
 
-%% Quality check to remove low-quality signals
-
-
-%% Apply compensation to fxm channel if needed by user
-
-
-%% Apply compensation to fxm - downstream channel to remove effect from fxm spillover
-
-
 %% Generate PMT readout output file
 %format follows: [time of detection(computer real time), PacificBlue(mV),FITC(mV), PE(mV), APC(mV), Cy7(mV)]
 output_pmt = [readout_pmt.time_of_detection',readout_pmt.voltage_pmt1',...

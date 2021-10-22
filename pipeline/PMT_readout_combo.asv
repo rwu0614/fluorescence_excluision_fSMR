@@ -45,15 +45,19 @@ addpath('plotting_functions\');
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
+    
+    % For signal QC filtering
+    analysis_params.thresh_baselineDiff_over_sig = 0.08; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_base_slope = 0.00004; % cutoff for left-right baseline slopes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% ---------------- Run mode and upstream compensation determination ----------- %%
 % To detemine if the user wants to analyze data including fluorescence
 % exclusion or purly for positive labeling
 
-fxm_channel = find(analysis_params.detect_thresh_pmt<0, 1);
+fxm_channel = find(analysis_params.detect_thresh_pmt<0, 5);
 
-if isempty(find(analysis_params.detect_thresh_pmt<0, 1))
+if isempty(find(analysis_params.detect_thresh_pmt<0, 5))
     analysis_params.fxm_mode = 0;
 else
     analysis_params.fxm_mode = 1;
@@ -161,6 +165,8 @@ voltage_pmt5 = [];
 segment_loop=0;
 flag = 0;
 while(flag==0)
+    % display progress bar
+    progress_bar = waitbar(0,'Starting analysis...');
     % seek data for current segement, datatype int is 8bytes
     for channel = 1:n_pmt_channel
         fseek(pmt_file_ID(channel),segment_loop*8*datasize, 'bof');
@@ -173,20 +179,28 @@ while(flag==0)
     end
     rawdata_time_pmt = fread(time_file_ID,datasize,'float64=>double');
     
-    [seg_readout_pmt] = P1_peakanalysis_pmt(segment_loop,num_segments,rawdata_pmt, rawdata_time_pmt, disp_params, analysis_params,input_info);
+    [seg_readout_pmt,progress_msg] = P1_peakanalysis_pmt(segment_loop,num_segments,rawdata_pmt, rawdata_time_pmt, disp_params, analysis_params,input_info);
 
     if ~isempty(seg_readout_pmt.time_of_detection)
-        time_of_detection = [time_of_detection, seg_readout_pmt.time_of_detection];
-        voltage_pmt1= [voltage_pmt1, seg_readout_pmt.amplitude{1}];
-        voltage_pmt2= [voltage_pmt2, seg_readout_pmt.amplitude{2}];
-        voltage_pmt3= [voltage_pmt3, seg_readout_pmt.amplitude{3}];
-        voltage_pmt4= [voltage_pmt4, seg_readout_pmt.amplitude{4}];
-        voltage_pmt5= [voltage_pmt5, seg_readout_pmt.amplitude{5}];
+%         time_of_detection = [time_of_detection, seg_readout_pmt.time_of_detection];
+%         voltage_pmt1= [voltage_pmt1, seg_readout_pmt.amplitude{1}];
+%         voltage_pmt2= [voltage_pmt2, seg_readout_pmt.amplitude{2}];
+%         voltage_pmt3= [voltage_pmt3, seg_readout_pmt.amplitude{3}];
+%         voltage_pmt4= [voltage_pmt4, seg_readout_pmt.amplitude{4}];
+%         voltage_pmt5= [voltage_pmt5, seg_readout_pmt.amplitude{5}];
+        if segment_loop ==0
+            full_readout_pmt = seg_readout_pmt;
+        else
+            full_readout_pmt = [full_readout_pmt,seg_readout_pmt];
+        end
     end
+    
+    waitbar(segment_loop/num_segments,progress_bar,{progress_msg.line1,progress_msg.line2,progress_msg.line3});
     
     segment_loop=segment_loop+1;
     
     if length(rawdata_pmt{1,1}) < datasize
+        waitbar(1,progress_bar,{progress_msg.line1,progress_msg.line2,progress_msg.line3,'Finishing'});
         flag = 1;
     end
 end
@@ -202,6 +216,13 @@ readout_pmt.voltage_pmt5 = voltage_pmt5*1000;
 %% Quality check to remove low-quality signals
 
 
+all_cell_baselineDiff_over_sig = abs(baseline_left_height-baseline_right_height)./voltage_pmt2;
+%all_cell_baselineDiff_over_sig = all_cell_baselineDiff_over_sig(all_cell_baselineDiff_over_sig<1);
+base_diff_pass_ind =  find(all_cell_baselineDiff_over_sig < thresh_baselineDiff_over_sig);
+base_leftslope_pass_ind = find(abs(baseline_left_slope) < thresh_base_slope);
+base_rightslope_pass_ind = find(abs(baseline_right_slope) < thresh_base_slope);
+
+cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
 %% Apply compensation to fxm channel if needed by user
 
 
@@ -223,4 +244,4 @@ cd(currentFolder)
 report_dir = [input_info.pmt_dir{1} '\' sample_name '_report\PMT_report\'];
 mkdir(report_dir)
 PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, analysis_params, readout_pmt);
-
+close(progress_bar)
