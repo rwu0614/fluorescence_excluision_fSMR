@@ -232,14 +232,7 @@ scatter(smr_data.smr(paired_smr_ind),real_density)
         h1.Normalization = 'probability';
         h1.BinWidth = 0.001;
         h1.FaceColor = [0.8500 0.3250 0.0980];
-        hold on
-        obj2plot =fc;
-        h2=histogram(obj2plot);
-        h2.Normalization = 'probability';
-        h2.BinWidth = 0.001;
-        h2.FaceColor = [0.3010 0.7450 0.9330];
-        hold off
-        legend('Volume exclusion','Fluid exchange')
+        legend('Volume exclusion')
         xlabel('Density (g/cm^{3})')
         ylabel('Probability density estimation')
 xlim([1.04,1.09])
@@ -253,14 +246,7 @@ title('L1210 density measurement')
         h1.Normalization = 'probability';
         h1.BinWidth = 5;
         h1.FaceColor = [0.8500 0.3250 0.0980];
-        hold on
-        obj2plot =fbm;
-        h2=histogram(obj2plot);
-        h2.Normalization = 'probability';
-        h2.BinWidth = 5;
-        h2.FaceColor = [0.3010 0.7450 0.9330];
-        hold off
-        legend('Volume exclusion','Fluid exchange')
+        legend('Volume exclusion')
         xlabel('Density (g/cm^{3})')
         ylabel('Probability density estimation')
 
@@ -272,24 +258,16 @@ title('L1210 density measurement')
         h1.Normalization = 'probability';
         h1.BinWidth = 50;
         h1.FaceColor = [0.8500 0.3250 0.0980];
-        hold on
-        obj2plot =fv;
-        h2=histogram(obj2plot);
-        h2.Normalization = 'probability';
-        h2.BinWidth = 50;
-        h2.FaceColor = [0.3010 0.7450 0.9330];
-        hold off
-        legend('Volume exclusion','Fluid exchange')
+        legend('Volume exclusion')
         xlabel('Density (g/cm^{3})')
         ylabel('Probability density estimation')
 %%
 figure(13)
 scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
-hold on
-scatter(fv,fc,10,"filled",'MarkerFaceColor',[0.8500 0.3250 0.0980],'MarkerFaceAlpha',0.8) 
+
 ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
-legend('Volume exclusion','Fluid exchange')
+legend('Volume exclusion')
 title('L1210 density measurement')
 
 %%
