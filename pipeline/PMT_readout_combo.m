@@ -214,21 +214,35 @@ readout_pmt.voltage_pmt4 = voltage_pmt4*1000;
 readout_pmt.voltage_pmt5 = voltage_pmt5*1000;
 
 %% Quality check to remove low-quality signals
+if fxm_mode == 1
+    all_cell_baselineDiff_over_sig = abs(full_readout_pmt.baseline_left_height{fxm_channel}-full_readout_pmt.baseline_right_height{fxm_channel})...
+        ./abs(full_readout_pmt.amplitude{fxm_channel}-full_readout_pmt.baseline{fxm_channel});
+    %all_cell_baselineDiff_over_sig = all_cell_baselineDiff_over_sig(all_cell_baselineDiff_over_sig<1);
+    base_leftslope_pass_ind = find(abs(full_readout_pmt.baseline_left_slope{fxm_channel}) < thresh_base_slope);
+    base_rightslope_pass_ind = find(abs(full_readout_pmt.baseline_right_slope{fxm_channel}) < thresh_base_slope);
 
-
-all_cell_baselineDiff_over_sig = abs(baseline_left_height-baseline_right_height)./voltage_pmt2;
-%all_cell_baselineDiff_over_sig = all_cell_baselineDiff_over_sig(all_cell_baselineDiff_over_sig<1);
-base_diff_pass_ind =  find(all_cell_baselineDiff_over_sig < thresh_baselineDiff_over_sig);
-base_leftslope_pass_ind = find(abs(baseline_left_slope) < thresh_base_slope);
-base_rightslope_pass_ind = find(abs(baseline_right_slope) < thresh_base_slope);
-
-cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
+    cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
+end
 %% Apply compensation to fxm channel if needed by user
-
-
+if fxm_mode == 1
+fxm_compen_amp = full_readout_pmt.amplitude{fxm_channel};
+    if analysis_params. upstream_compen == 1
+        for i = 1:length(fxm_compen_amp)
+            fxm_compen_amp = (abs(full_readout_pmt.amplitude{i}-full_readout_pmt.baseline{i}))*compen_factor(i)+fxm_compen_amp;
+        end
+        full_readout_pmt.amplitude{fxm_channel} = fxm_compen_amp;
+    end
+end
 %% Apply compensation to fxm - downstream channel to remove effect from fxm spillover
+full_readout_pmt.signal = cellfun(@(x,y) abs(x-y),full_readout_pmt.amplitude,full_readout_pmt.baseline,"UniformOutput",false);
 
-
+if fxm_mode == 1
+    full_readout_pmt.signal{fxm_channel} = abs((full_readout_pmt.amplitude{fxm_channel}-full_readout_pmt.baseline{fxm_channel})./full_readout_pmt.baseline{fxm_channel});
+    for i= fxm_channel+1:n_pmt_channel
+        full_readout_pmt.signal{i} = abs(full_readout_pmt.amplitude{i}-full_readout_pmt.baseline{i}.*...
+            (full_readout_pmt.amplitude{fxm_channel}./full_readout_pmt.baseline{fxm_channel}));
+    end
+end
 %% Generate PMT readout output file
 %format follows: [time of detection(computer real time), PacificBlue(mV),FITC(mV), PE(mV), APC(mV), Cy7(mV)]
 output_pmt = [readout_pmt.time_of_detection',readout_pmt.voltage_pmt1',...
