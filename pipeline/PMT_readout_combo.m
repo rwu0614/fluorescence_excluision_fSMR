@@ -47,7 +47,7 @@ addpath('plotting_functions\');
     
     
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.03; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 1.5*10^-4; % cutoff for left-right baseline slopes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -191,7 +191,7 @@ while(flag==0)
     segment_loop=segment_loop+1;
     
     if length(rawdata_pmt{1,1}) < datasize
-        waitbar(1,progress_bar,{progress_msg.line0,progress_msg.line1,progress_msg.line2,progress_msg.line3,'Finishing'});
+        waitbar(1,progress_bar,{'Finishing'});
         pause(0.5)
         flag = 1;
     end
