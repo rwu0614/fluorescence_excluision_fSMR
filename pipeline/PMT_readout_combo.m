@@ -6,7 +6,7 @@ addpath('report_functions\');
 addpath('helper_functions\');
 addpath('plotting_functions\');
 
-%%
+%% Ye Zhang
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Optimize using following parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
