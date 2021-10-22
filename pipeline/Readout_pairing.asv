@@ -166,7 +166,7 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 
 
 
-%% Below are for a quick look at the paired data from fxm experiment with FITC dextran
+%% Below are for a quick look at the paired data
 
 %% For trapping
 % ex_x = smr_data.time(paired_smr_ind)/1000;
