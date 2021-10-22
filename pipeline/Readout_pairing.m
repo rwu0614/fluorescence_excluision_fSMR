@@ -263,17 +263,18 @@ title('L1210 density measurement')
         ylabel('Probability density estimation')
 %%
 figure(13)
-scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
+%scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
+dscatter(real_vol,real_density,'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','scatter') 
 
 ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
 legend('Volume exclusion')
 title('L1210 density measurement')
 
-%%
-CV_volexclusion = std(real_density)/mean(real_density);
-disp(CV_volexclusion)
-CV_fluidexchange = std(fc)/mean(fc);
-disp(CV_fluidexchange)
+% %%
+% CV_volexclusion = std(real_density)/mean(real_density);
+% disp(CV_volexclusion)
+% CV_fluidexchange = std(fc)/mean(fc);
+% disp(CV_fluidexchange)
 
 
