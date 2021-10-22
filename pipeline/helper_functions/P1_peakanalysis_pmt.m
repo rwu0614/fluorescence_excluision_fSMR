@@ -51,10 +51,8 @@ idx_rangeofinterest = find(rawdata_pmt{1,1} > Baseline_rough_cutoff);
 % Existing segment when too few signals are above baseline cutoff (for long
 % experiment when light source is turned off when not used
 if length(idx_rangeofinterest) < med_filt_window_size
-    readout_pmt.time_of_detection = [];
-    readout_pmt.amplitude=[];
-    readout_pmt.location = [];
-    readout_pmt.baseline=[];
+    readout_pmt = [];
+    progress_msg = [];
     fprintf('Too short for peak selection...exiting this segment\n')
     elapsed_time = elapsed_time + (rawdata_time_pmt(end) - rawdata_time_pmt(1));
     elapsed_index = elapsed_index + length(rawdata_pmt{1});
@@ -128,7 +126,7 @@ for i = 1:n_pmt_channel
 % using multiplier of noise amplitude as cutoff values
     % compute noise of baseline by taking the differential of baseline and
     % remove 2.5% of lower and higher outliers, and take standard deviation
-    noise_data_keep = rmoutliers(diff(Data.normalized{1,positive_label_channel(i)}),'percentiles',[1,99]);
+    noise_data_keep = rmoutliers(diff(Data.normalized{1,i}),'percentiles',[1,99]);
     Process.peak_threshold{i}= Process.baseline{i} + detect_thresh_pmt(i)*std(noise_data_keep);
 end
 
@@ -160,10 +158,8 @@ end
 %exiting the script if no peaks were found
 if sum([Peak.count{:}])==0
     fprintf('\nNo peak found in this section...exiting this segment\n');
-    readout_pmt.time_of_detection = [];
-    readout_pmt.amplitude=[];
-    readout_pmt.location = [];
-    readout_pmt.baseline=[];
+    readout_pmt = [];
+    progress_msg = [];
     elapsed_time = elapsed_time + (rawdata_time_pmt(end) - rawdata_time_pmt(1));
     elapsed_index = elapsed_index + length(rawdata_pmt{1,i});
     return;
@@ -214,19 +210,19 @@ while (exitflag ~=1)
     
     if fxm_baseline_choice==1 && fxm_mode==1
         plotrange_fxm = max(tempstart-uni_peak_baseline_window_size,1):min(tempend, x_axis_Ind(end)); % grab only left side baseline
-        local_baseline{fxm_channel} = median(Data.filtered_med{fxm_channel}(plotrange_fxm));
+        local_baseline(fxm_channel) = median(Data.filtered_med{fxm_channel}(plotrange_fxm));
     elseif fxm_baseline_choice ==2 && fxm_mode==1
         plotrange_fxm = max(tempend,1):min(tempend+uni_peak_baseline_window_size, x_axis_Ind(end)); % grab only right side baseline
-        local_baseline{fxm_channel} = median(Data.filtered_med{fxm_channel}(plotrange_fxm));
+        local_baseline(fxm_channel) = median(Data.filtered_med{fxm_channel}(plotrange_fxm));
     end
 
     i=seg_num_peaks;
 
     for channel = 1:n_pmt_channel
-         [~, Peak.location{channel}(i)] = cellfun(@(x) max(abs(x(maxrange)-y)), Data.filtered_med_ave(channel),local_baseline(channel));
+         [~, Peak.location{channel}(i)] = cellfun(@(x) max(abs(x(maxrange)-local_baseline(channel))), Data.filtered_med_ave(channel));
         Peak.location{channel}(i) = Peak.location{channel}(i) + maxrange(1) - 1;
         Peak.amplitude{channel}(i) = Data.filtered_med_ave{channel}(Peak.location{channel}(i)) ; % absolute pmt voltage at the peak
-        Peak.baseline{channel}(i) = local_baseline{channel}; % absolute pmt voltage at the baseline near the peak
+        Peak.baseline{channel}(i) = local_baseline(channel); % absolute pmt voltage at the baseline near the peak
         Peak.time{channel}(i)=t(Peak.location{channel}(i));
         Peak.width{channel}(i)= length(maxrange);
         
@@ -276,14 +272,14 @@ while (exitflag ~=1)
 %                 plot(plotrange, Data.filtered_med{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
                 plot(plotrange, Data.normalized{channel}(plotrange)-local_baseline(channel), '.', 'color', 'blue'); hold on;
                 plot(left_base_range, Data.normalized{channel}(left_base_range)-local_baseline(channel), '.', 'color', 'yellow'); hold on;
-                plot(right_base_range, Data.normalized{channel}(right_base_range)-local_baseline(channel), '.', 'color', 'yellow'); hold on;
+                plot(right_base_range, Data.normalized{channel}(right_base_range)-local_baseline(channel), '.', 'color', 'cyan'); hold on;
                 plot(maxrange, Data.filtered_med_ave{channel}(maxrange)-local_baseline(channel), '-r');
-                plot(Peak.location{channel}(i), -Peak.amplitude{channel}(i), 'or');
+                plot(Peak.location{channel}(i), Peak.amplitude{channel}(i)-local_baseline(channel), 'or');
                 plot(plotrange, zeros(1,length(plotrange)), 'k-');
                 hold off;
                 if channel ==plotspace.n_col(end)
                     axP = get(gca,'Position');
-                    legend(["Raw data","Median + moving average filter",...
+                    legend(["Raw data","Left baseline","Left baseline","Median + moving average filter",...
                         "Peak","Baseline"]...
                     ,'Location','SouthOutside');
                     set(gca, 'Position', axP);
@@ -312,16 +308,16 @@ while (exitflag ~=1)
 end
 
 %% Generate output
-
-readout_pmt.time_of_detection = Peak.time_of_detection;
-readout_pmt.amplitude=Peak.amplitude;
-readout_pmt.baseline=Peak.baseline;
-readout_pmt.width=Peak.width;
-readout_pmt.location = cellfun(@(x) x + elapsed_index,Peak.location,"UniformOutput",false);
-readout_pmt.baseline_left_slope = Peak.baseline_left_slope;
-readout_pmt.baseline_right_slope = Peak.baseline_right_slope;
-readout_pmt.baseline_left_height = Peak.baseline_left_height;
-readout_pmt.baseline_right_height =Peak.baseline_right_height;
+readout_pmt = table();
+readout_pmt.time_of_detection = Peak.time_of_detection';
+readout_pmt.amplitude=cell2mat(Peak.amplitude')';
+readout_pmt.baseline=cell2mat(Peak.baseline')';
+readout_pmt.width=cell2mat(Peak.width(1)')';
+readout_pmt.location = cell2mat(cellfun(@(x) x + elapsed_index,Peak.location,"UniformOutput",false)')';
+readout_pmt.baseline_left_slope = cell2mat(Peak.baseline_left_slope')';
+readout_pmt.baseline_right_slope = cell2mat(Peak.baseline_right_slope')';
+readout_pmt.baseline_left_height = cell2mat(Peak.baseline_left_height')';
+readout_pmt.baseline_right_height =cell2mat(Peak.baseline_right_height')';
 
 
 if disp_progress==1
@@ -335,7 +331,8 @@ elapsed_time = elapsed_time + (rawdata_time_pmt(end) - rawdata_time_pmt(1));
 elapsed_index = elapsed_index + length(rawdata_pmt{1});
 elapsed_peak_count = elapsed_peak_count + length(Peak.time_of_detection);
 
-progress_msg.line1 = sprintf('\n\nSegment#%1.0f of %1.0f, Segment peak count = %1.0f, Total peak count = %1.0f \n',n_segment,num_segments,seg_num_peaks,elapsed_peak_count);
+progress_msg.line0 = sprintf('   Segment#%1.0f of %1.0f\n',n_segment,num_segments);
+progress_msg.line1 = sprintf('  Segment peak count = %1.0f, Total peak count = %1.0f \n',seg_num_peaks,elapsed_peak_count);
 progress_msg.line2 = sprintf('  %%-- elapsed time   : %1.2f minutes --%%\n', elapsed_time/60);
 progress_msg.line3 = sprintf('  %%-- Average detection throughput: %1.2f events/minutes --%%\n\n', elapsed_peak_count/(elapsed_time/60));
 

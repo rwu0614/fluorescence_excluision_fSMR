@@ -136,13 +136,7 @@ scrsize = get(0, 'Screensize');
 % making summary matrix that includes all pmt channels for systemic
 % plotting
 n_pmt_channel =5;
-peak_amp_summary = zeros(n_pmt_channel,length(readout_pmt.time_of_detection));
-peak_amp_summary(1,:) = readout_pmt.voltage_pmt1;
-peak_amp_summary(2,:) = readout_pmt.voltage_pmt2;
-peak_amp_summary(3,:) = readout_pmt.voltage_pmt3;
-peak_amp_summary(4,:) = readout_pmt.voltage_pmt4;
-peak_amp_summary(5,:) = readout_pmt.voltage_pmt5;
-
+peak_amp_summary = readout_pmt.signal';
 scrsize = get(0, 'Screensize');
 
 %% Figure 1 plotting distributions of all fluorescence signal in each channel 
