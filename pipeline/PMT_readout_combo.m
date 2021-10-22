@@ -42,12 +42,12 @@ addpath('plotting_functions\');
     analysis_params.detect_thresh_pmt(1) = 10; 
     analysis_params.detect_thresh_pmt(2) = -5; 
     analysis_params.detect_thresh_pmt(3) = 10;
-    analysis_params.detect_thresh_pmt(4) = 5;
+    analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.5; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 1.5*10^-4; % cutoff for left-right baseline slopes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

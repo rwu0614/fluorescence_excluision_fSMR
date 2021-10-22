@@ -12,21 +12,23 @@ addpath('plotting_functions\');
 %%%%%%%%%%%%%%%%%%%%%  User Input Required %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Specify path to FBM_metadata_assembly_instruction sheet
-instruction_path = 'Z:\richardwu\fSMR_analysis\BMS_PDX_actute_drug_testing_project\fSMR_readout_analysis\20210728_fbm_assembly\FBM_metadata_assembly_instruction_X1362_april_20210728.CSV';
+% Input UI to grab path to FBM_metadata_assembly_instruction sheet
+fprintf('\nGetting FBM metadata assembly instruction...\n')
+[input_info.instruction_filename, input_info.instruction_dir, exist_pmt] = uigetfile('../*.*','Select FBM metadata assembly instruction File',' ');
+
+instruction_path = [input_info.instruction_dir,'\',input_info.instruction_filename];
 
 % Specify paired data instruction format by colume
-%paired_data_var_names = {'realtime','buoyant_mass','pmt1','pmt2','pmt3','pmt4','pmt5','P2S_transit_time'};
-
-paired_data_var_names = {'realtime','buoyant_mass','pmt1','pmt2','pmt3'}; % older version of paired readout
+paired_data_var_names = {'realtime','buoyant_mass','pmt1','pmt2','pmt3','pmt4','pmt5','P2S_transit_time'};
+%paired_data_var_names = {'realtime','buoyant_mass','pmt1','pmt2','pmt3'}; % for older readout_pairing version
 
 % Specify base FBM and metadata table format
-%FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3','pmt4','pmt5','P2S_transit_time'};
-FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3'}; % older version
+FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3','pmt4','pmt5','P2S_transit_time'};
+%FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3'}; % for older readout_pairing version
 instruct_var_to_exclude = {'path','filename'}; % metadata sheet will include all variables from the instruction sheet except variables specified here
 
-% Specify name for FBM and metadata output
-assembly_name = 'x1362_april_20210728';
+% Input UI to specify names for FBM and metadata output
+assembly_name = input('Input name for this assembly (suffix annotation to be added to FBM and metadata names):\n','s');
 FBM_name = ['FBM_base_',assembly_name,'.txt'];
 metadata_name =['metadata_base_',assembly_name,'.txt'];
 
