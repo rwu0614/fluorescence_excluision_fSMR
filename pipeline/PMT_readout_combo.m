@@ -40,7 +40,7 @@ addpath('plotting_functions\');
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -5; 
+    analysis_params.detect_thresh_pmt(2) = -3;  % change from -5 to -3
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
@@ -191,7 +191,7 @@ while(flag==0)
     segment_loop=segment_loop+1;
     
     if length(rawdata_pmt{1,1}) < datasize
-        waitbar(1,progress_bar,{progress_msg.line0,progress_msg.line1,progress_msg.line2,progress_msg.line3,'Finishing'});
+        waitbar(1,progress_bar,'Finishing');
         pause(0.5)
         flag = 1;
     end
@@ -207,7 +207,7 @@ if fxm_mode == 1
     base_rightslope_pass_ind = find(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)) < analysis_params.thresh_base_slope);
 
     cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
-    QC_msg = sprintf('%% %0.2f of detected signals passed QC check',100*length(cell_pass_ind)/height(full_readout_pmt.amplitude));
+    QC_msg = sprintf('%% %0.2f of detected signals passed QC check',100*length(cell_pass_ind)/length(full_readout_pmt.amplitude(:,1)));
     
      waitbar(1,progress_bar,QC_msg);
         pause(0.5)

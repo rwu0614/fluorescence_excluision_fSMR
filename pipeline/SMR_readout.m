@@ -167,7 +167,7 @@ select_smrpeaks_fast;
 
 %% Output readout csv file
 % datasmr_good format is [tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm'];
-
+% to grab ND data (change in  readout_pairing.m, FBM_assembly)
 output_smr = [datasmr_good(:,1),datasmr_good(:,6)]; %time, first peakhight
 
 cd(smr_dir)
@@ -197,7 +197,8 @@ sub_1 = subplot(3,1,1);
 %plotting 
 Rough_datarate = 20000; %For Feedback mode CIC rate = 10000, datarate is around 20000
 dt_data = 1000/Rough_datarate;% unit = ms, delta t between two consecutive raw data point
-keep_ind = find(datafull(3,:)<300); %filter on transit_time
+keep_ind = find(datafull(3,:)<1500); %filter on transit_time
+                                     % change from 300 to 1500 by YeZ
 transit_fil_datafull = datafull(:,keep_ind);
 keep_ind_2 = find(transit_fil_datafull(2,:)<800); %filter on buoyant mass, 400pg cap
 mass_transit_fil_datafull = transit_fil_datafull(:,keep_ind_2);

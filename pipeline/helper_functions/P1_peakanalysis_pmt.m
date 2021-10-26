@@ -226,9 +226,9 @@ while (exitflag ~=1)
         Peak.time{channel}(i)=t(Peak.location{channel}(i));
         Peak.width{channel}(i)= length(maxrange);
         
-        left_base_fit = polyfit(1:1:length(left_base_range),Data.normalized{channel}(left_base_range),1);
+        left_base_fit = polyfit(1:1:length(left_base_range),Data.normalized{channel}(left_base_range)',1);
        
-        right_base_fit = polyfit(1:1:length(right_base_range),Data.normalized{channel}(right_base_range),1);
+        right_base_fit = polyfit(1:1:length(right_base_range),Data.normalized{channel}(right_base_range)',1);
         
         Peak.baseline_left_slope{channel}(i) = left_base_fit(1);
         Peak.baseline_right_slope{channel}(i) = right_base_fit(1);
