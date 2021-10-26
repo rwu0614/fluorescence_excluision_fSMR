@@ -477,7 +477,7 @@ for i = 1:n_pmt_channel
         set(gca,'ColorScale','log','FontSize',10)
         colormap(cmap);
         c=colorbar;
-        caxis([prctile(color_overlay,10) prctile(color_overlay,90)]);
+%         caxis([prctile(color_overlay,10) prctile(color_overlay,90)]);
         title(append(sample_name, ' ', 'Transit time', ' vs BM'))
         legend(['n' '=' int2str(length(y_filtered))],'location',"southeast")
         set(get(c,'title'),'string',append(rpt_title_color_lab(i), ' (mV)'),'Rotation',0);
@@ -499,7 +499,7 @@ for i = 1:n_pmt_channel
         set(gca,'ColorScale','log','FontSize',10)
         colormap(cmap);
         c=colorbar;
-        caxis([prctile(color_overlay,10) prctile(color_overlay,90)]);
+%        caxis([prctile(color_overlay,10) prctile(color_overlay,90)]);
         title(append(sample_name, ' ', 'Transit time', ' vs BM'))
         legend(['n' '=' int2str(length(y_filtered))],'location',"southeast")
         set(get(c,'title'),'string',append(rpt_title_color_lab(i), ' (mV)'),'Rotation',0);
