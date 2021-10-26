@@ -42,12 +42,12 @@ addpath('plotting_functions\');
     analysis_params.detect_thresh_pmt(1) = 10; 
     analysis_params.detect_thresh_pmt(2) = -5; 
     analysis_params.detect_thresh_pmt(3) = 10;
-    analysis_params.detect_thresh_pmt(4) = 10;
+    analysis_params.detect_thresh_pmt(4) = 2.5;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.03; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.1; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 1.5*10^-4; % cutoff for left-right baseline slopes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -233,12 +233,12 @@ end
 waitbar(1,progress_bar,{QC_msg,upComp_msg});
 pause(0.5)
 %% Apply compensation to fxm - downstream channel to remove effect from fxm spillover
-full_readout_pmt.signal = abs(full_readout_pmt.amplitude-full_readout_pmt.baseline);
+full_readout_pmt.signal_V = abs(full_readout_pmt.amplitude-full_readout_pmt.baseline);
 
 if fxm_mode == 1
-    full_readout_pmt.signal(:,fxm_channel) = abs((full_readout_pmt.amplitude(:,fxm_channel)-full_readout_pmt.baseline(:,fxm_channel))./full_readout_pmt.baseline(:,fxm_channel));
+    full_readout_pmt.signal_V(:,fxm_channel) = abs((full_readout_pmt.amplitude(:,fxm_channel)-full_readout_pmt.baseline(:,fxm_channel))./full_readout_pmt.baseline(:,fxm_channel));
     for i= fxm_channel+1:n_pmt_channel
-        full_readout_pmt.signal(:,i) = abs(full_readout_pmt.amplitude(:,i)-full_readout_pmt.baseline(:,i).*...
+        full_readout_pmt.signal_V(:,i) = abs(full_readout_pmt.amplitude(:,i)-full_readout_pmt.baseline(:,i).*...
             (full_readout_pmt.amplitude(:,fxm_channel)./full_readout_pmt.baseline(:,fxm_channel)));
     end
     downComp_msg = sprintf('Fxm downstream compensation applied');
@@ -256,7 +256,7 @@ output_msg = 'Generating output';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg});
 pause(0.5)
 
-full_readout_pmt.signal = full_readout_pmt.signal*1000; %Convert to mV
+full_readout_pmt.signal = full_readout_pmt.signal_V*1000; %Convert to mV
 output_pmt = [full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal((cell_pass_ind),:)];
 
 cd(input_info.pmt_dir(1))

@@ -197,9 +197,9 @@ sub_1 = subplot(3,1,1);
 %plotting 
 Rough_datarate = 20000; %For Feedback mode CIC rate = 10000, datarate is around 20000
 dt_data = 1000/Rough_datarate;% unit = ms, delta t between two consecutive raw data point
-keep_ind = find(datafull(3,:)<300); %filter on transit_time
+keep_ind = find(datafull(3,:)<10000); %filter on transit_time
 transit_fil_datafull = datafull(:,keep_ind);
-keep_ind_2 = find(transit_fil_datafull(2,:)<800); %filter on buoyant mass, 400pg cap
+keep_ind_2 = find(transit_fil_datafull(2,:)<8000); %filter on buoyant mass, 400pg cap
 mass_transit_fil_datafull = transit_fil_datafull(:,keep_ind_2);
 mass_transit_fil_datafull(:,1) =[];
 peak_time = mass_transit_fil_datafull(1,:)-mass_transit_fil_datafull(1,1);
