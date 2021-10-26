@@ -166,46 +166,48 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 
 
 
-%%
-ex_x = smr_data.time(paired_smr_ind)/1000;
-ex_x = ex_x-ex_x(1);
+%% Below are for a quick look at the paired data from fxm experiment with FITC dextran
 
-ex_y = pmt_input{:,3}(paired_pmt_ind);
-
-ex_smr = smr_data.smr(paired_smr_ind);
-
-%cell_1_ind = find(ex_x>0&ex_x<200&ex_y>100);
-cell_1_ind = find(ex_x>6200&ex_x<6800&ex_y<80);
-%cell_1_ind = find(ex_x>325&ex_x<600&ex_y>0&ex_y<300);
-%cell_1_ind = find(ex_x>2000&ex_x<2200&ex_y>100&ex_y<400);
-
-cell_1_ind = cell_1_ind(1:1:end);
-cell_1_x = ex_x(cell_1_ind);
-cell_1_y = ex_y(cell_1_ind);
-
-% cell_1_y_base = medfilt1(cell_1_y,100);
-% cell_1_y_base(1) = cell_1_y_base(2);
-% cell_1_y_base = cell_1_y_base-cell_1_y_base(1);
-
-cell_1_y_mod = cell_1_y;
-
-figure(1)
-scatter(ex_x,ex_y,'.');
-hold on
-scatter(cell_1_x,cell_1_y,'.');
-hold off
-
-figure(2)
-scatter(cell_1_x,ex_smr((cell_1_ind)),'.');
-
-figure(3)
-scatter(cell_1_x,ex_smr((cell_1_ind))./cell_1_y,'.');
-
-cell_1_std = std(cell_1_y);
-cell_1_average = mean(cell_1_y);
-cell_1_cv = cell_1_std/cell_1_average;
-disp(cell_1_cv*100)
-
+%% For trapping
+% ex_x = smr_data.time(paired_smr_ind)/1000;
+% ex_x = ex_x-ex_x(1);
+% 
+% ex_y = pmt_input{:,3}(paired_pmt_ind);
+% 
+% ex_smr = smr_data.smr(paired_smr_ind);
+% 
+% %cell_1_ind = find(ex_x>0&ex_x<200&ex_y>100);
+% cell_1_ind = find(ex_x>6200&ex_x<6800&ex_y<80);
+% %cell_1_ind = find(ex_x>325&ex_x<600&ex_y>0&ex_y<300);
+% %cell_1_ind = find(ex_x>2000&ex_x<2200&ex_y>100&ex_y<400);
+% 
+% cell_1_ind = cell_1_ind(1:1:end);
+% cell_1_x = ex_x(cell_1_ind);
+% cell_1_y = ex_y(cell_1_ind);
+% 
+% % cell_1_y_base = medfilt1(cell_1_y,100);
+% % cell_1_y_base(1) = cell_1_y_base(2);
+% % cell_1_y_base = cell_1_y_base-cell_1_y_base(1);
+% 
+% cell_1_y_mod = cell_1_y;
+% 
+% figure(1)
+% scatter(ex_x,ex_y,'.');
+% hold on
+% scatter(cell_1_x,cell_1_y,'.');
+% hold off
+% 
+% figure(2)
+% scatter(cell_1_x,ex_smr((cell_1_ind)),'.');
+% 
+% figure(3)
+% scatter(cell_1_x,ex_smr((cell_1_ind))./cell_1_y,'.');
+% 
+% cell_1_std = std(cell_1_y);
+% cell_1_average = mean(cell_1_y);
+% cell_1_cv = cell_1_std/cell_1_average;
+% disp(cell_1_cv*100)
+% 
 
 
 %%
@@ -219,11 +221,16 @@ real_dia = (real_vol*6/pi).^(1/3);
 real_density = smr_data.smr(paired_smr_ind)./real_vol+1.005584+0.018;
 figure (1)
 scatter(real_vol,real_density)
+xlabel('Volume (fL)')
+ylabel('Density (g/cm3)')
 figure (2)
 scatter(real_vol,smr_data.smr(paired_smr_ind))
+xlabel('Volume (fL)')
+ylabel('Buoyant mass (pg)')
 figure (3)
 scatter(smr_data.smr(paired_smr_ind),real_density)
-
+xlabel('Buoyant mass (pg)')
+ylabel('Density (g/cm3)')
 %%
  figure(10) %density histo
         obj2plot =real_density;
@@ -232,20 +239,11 @@ scatter(smr_data.smr(paired_smr_ind),real_density)
         h1.Normalization = 'probability';
         h1.BinWidth = 0.001;
         h1.FaceColor = [0.8500 0.3250 0.0980];
-        hold on
-        obj2plot =fc;
-        h2=histogram(obj2plot);
-        h2.Normalization = 'probability';
-        h2.BinWidth = 0.001;
-        h2.FaceColor = [0.3010 0.7450 0.9330];
-        hold off
-        legend('Volume exclusion','Fluid exchange')
         xlabel('Density (g/cm^{3})')
         ylabel('Probability density estimation')
 xlim([1.04,1.09])
-title('L1210 density measurement')
+title('Density measurement')
 
-%%
  figure(11) %density histo
         obj2plot =smr_data.smr(paired_smr_ind)*1.2;
         bin_n = round(length(obj2plot)/40);
@@ -253,18 +251,9 @@ title('L1210 density measurement')
         h1.Normalization = 'probability';
         h1.BinWidth = 5;
         h1.FaceColor = [0.8500 0.3250 0.0980];
-        hold on
-        obj2plot =fbm;
-        h2=histogram(obj2plot);
-        h2.Normalization = 'probability';
-        h2.BinWidth = 5;
-        h2.FaceColor = [0.3010 0.7450 0.9330];
-        hold off
-        legend('Volume exclusion','Fluid exchange')
-        xlabel('Density (g/cm^{3})')
+        xlabel('Buoyant mass (pg)')
         ylabel('Probability density estimation')
 
-%%
  figure(12) %density histo
         obj2plot =real_vol;
         bin_n = round(length(obj2plot)/40);
@@ -272,30 +261,23 @@ title('L1210 density measurement')
         h1.Normalization = 'probability';
         h1.BinWidth = 50;
         h1.FaceColor = [0.8500 0.3250 0.0980];
-        hold on
-        obj2plot =fv;
-        h2=histogram(obj2plot);
-        h2.Normalization = 'probability';
-        h2.BinWidth = 50;
-        h2.FaceColor = [0.3010 0.7450 0.9330];
-        hold off
-        legend('Volume exclusion','Fluid exchange')
-        xlabel('Density (g/cm^{3})')
+        legend('Volume exclusion')
+        xlabel('Volume (fL)')
         ylabel('Probability density estimation')
 %%
 figure(13)
-scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
-hold on
-scatter(fv,fc,10,"filled",'MarkerFaceColor',[0.8500 0.3250 0.0980],'MarkerFaceAlpha',0.8) 
+%scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
+dscatter(real_vol,real_density,'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','scatter') 
+
 ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
-legend('Volume exclusion','Fluid exchange')
+legend('Volume exclusion')
 title('L1210 density measurement')
 
-%%
-CV_volexclusion = std(real_density)/mean(real_density);
-disp(CV_volexclusion)
-CV_fluidexchange = std(fc)/mean(fc);
-disp(CV_fluidexchange)
+% %%
+% CV_volexclusion = std(real_density)/mean(real_density);
+% disp(CV_volexclusion)
+% CV_fluidexchange = std(fc)/mean(fc);
+% disp(CV_fluidexchange)
 
 
