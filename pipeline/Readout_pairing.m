@@ -213,10 +213,10 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 %%
 %2.4485634
 %8.8485634
-median_vol_real = 1100; %fL for L1210
+median_vol_real = 668; %fL for L1210
 median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
 PMT_to_pL_conversion_factor = median_vol_real/median_vol_au; %um3
-PMT_to_pL_conversion_factor=10;
+PMT_to_pL_conversion_factor=7;
 real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_pL_conversion_factor;
 real_dia = (real_vol*6/pi).^(1/3);
 real_density = smr_data.smr(paired_smr_ind)./real_vol+1.005584+0.018;
@@ -233,7 +233,7 @@ scatter(smr_data.smr(paired_smr_ind),real_density)
 xlabel('Buoyant mass (pg)')
 ylabel('Density (g/cm3)')
 
-scatter(smr_data.smr(paired_smr_ind),pmt_input{:,3}(paired_pmt_ind))
+
 %%
  figure(10) %density histo
         obj2plot =real_density;

@@ -42,7 +42,7 @@ addpath('plotting_functions\');
     analysis_params.detect_thresh_pmt(1) = 10; 
     analysis_params.detect_thresh_pmt(2) = -5; 
     analysis_params.detect_thresh_pmt(3) = 10;
-    analysis_params.detect_thresh_pmt(4) = 10;
+    analysis_params.detect_thresh_pmt(4) = 2;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     
@@ -289,15 +289,13 @@ tt = (full_readout_pmt.amplitude(cell_pass_ind,4)-(full_readout_pmt.baseline(cel
             (full_readout_pmt.amplitude(cell_pass_ind,fxm_channel)./full_readout_pmt.baseline(cell_pass_ind,fxm_channel)));
 scatter(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),tt*1000)
 %%
-co_check_ind = find(full_readout_pmt.signal(cell_pass_ind,fxm_channel)>10&full_readout_pmt.signal(cell_pass_ind,fxm_channel)<300);
+co_check_ind = find(full_readout_pmt.signal(cell_pass_ind,fxm_channel)>10);
 co_check_ind = cell_pass_ind(co_check_ind);
-x = abs(full_readout_pmt.signal(co_check_ind,fxm_channel));
-y =abs((full_readout_pmt.amplitude(co_check_ind,3)-full_readout_pmt.baseline(co_check_ind,3))./full_readout_pmt.baseline(co_check_ind,3))*1000;
-scatter(x,y)
-temp_stats = regstats(y,x,'linear');
-disp(temp_stats.beta(2))
+x = 
+scatter(abs(full_readout_pmt.signal(co_check_ind,fxm_channel)),abs((full_readout_pmt.amplitude(co_check_ind,4)-full_readout_pmt.baseline(co_check_ind,4))./full_readout_pmt.baseline(co_check_ind,4))*1000)
+temp_stats = regstats(y_tofit,x_tofit,'linear');
 
-scatter(full_readout_pmt.signal(cell_pass_ind,fxm_channel),full_readout_pmt.signal(cell_pass_ind,4))
+
 
 
 
