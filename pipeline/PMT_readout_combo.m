@@ -211,12 +211,14 @@ if fxm_mode == 1
 
     cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
     QC_msg = sprintf('%% %0.2f of detected signals passed QC check',100*length(cell_pass_ind)/height(full_readout_pmt.amplitude));
-    
-     waitbar(1,progress_bar,QC_msg);
-        pause(0.5)
+else
+    cell_pass_ind = 1:1:height(full_readout_pmt);
+    QC_msg = sprintf('QC check are passed');
 end
-hist(all_cell_baselineDiff_over_sig,1000)
-scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
+waitbar(1,progress_bar,QC_msg);
+pause(0.5)
+% hist(all_cell_baselineDiff_over_sig,1000)
+% scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
 %% Apply compensation to fxm channel if needed by user
 if fxm_mode == 1
     fxm_compen_amp = full_readout_pmt.amplitude(:,fxm_channel);

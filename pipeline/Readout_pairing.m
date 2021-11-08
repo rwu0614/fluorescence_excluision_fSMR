@@ -216,7 +216,7 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 median_vol_real = 668; %fL for L1210
 median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
 PMT_to_pL_conversion_factor = median_vol_real/median_vol_au; %um3
-PMT_to_pL_conversion_factor=7;
+PMT_to_pL_conversion_factor=10;
 real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_pL_conversion_factor;
 real_dia = (real_vol*6/pi).^(1/3);
 real_density = smr_data.smr(paired_smr_ind)./real_vol+1.005584+0.018;
@@ -240,11 +240,11 @@ ylabel('Density (g/cm3)')
         bin_n = round(length(obj2plot)/40);
         h1=histogram(obj2plot);
         h1.Normalization = 'probability';
-        h1.BinWidth = 0.001;
+        h1.BinWidth = 0.0015;
         h1.FaceColor = [0.8500 0.3250 0.0980];
         xlabel('Density (g/cm^{3})')
         ylabel('Probability density estimation')
-xlim([1.04,1.09])
+xlim([1.04,1.12])
 title('Density measurement')
 
  figure(11) %density histo
@@ -276,7 +276,16 @@ ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
 legend('Volume exclusion')
 title('L1210 density measurement')
+%%
+figure(14)
+%scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
+apc = pmt_input{:,4}(paired_pmt_ind);
+dscatter(smr_data.smr(paired_smr_ind),log2(apc),'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','scatter') 
 
+ylabel('Density (g/cm^{3})')
+xlabel('Volume (fL)')
+legend('Volume exclusion')
+title('L1210 density measurement')
 % %%
 % CV_volexclusion = std(real_density)/mean(real_density);
 % disp(CV_volexclusion)
