@@ -35,8 +35,8 @@ pmt_data.pmt{4}=pmt_input{:,5};
 pmt_data.pmt{5}=pmt_input{:,6};
 
 %% SMR data conversion from hz to pg
-smr_data.chipID = 'G5W2 505-B15-L';
-smr_data.Hz2pg_conversion_factor = 0.59553;
+smr_data.chipID = '505_20211119';
+smr_data.Hz2pg_conversion_factor = 0.64982;
 smr_data.smr=smr_input{:,2}*smr_data.Hz2pg_conversion_factor; % convert from Hz to pg
 
 % fil_smr_ind = find(smr_data.smr>50);
@@ -148,6 +148,10 @@ paired_smr_ind = uni_paired_smr_ind(uni_paried_ind_smr_pmt);
 paired_delta_t = uni_paired_delta_t(uni_paried_ind_smr_pmt);
 n = length(paired_pmt_ind);
 multiplet_count = length(pre_filt_paired_pmt_ind)-n;
+
+%%
+% paired_smr_ind = paired_smr_ind(end-1500:end);
+% paired_pmt_ind = paired_pmt_ind(end-1500:end);
 %% Generate output
 %format follows: [time of detection(computer real time), smr(pg), PacificBlue(mV),FITC(mV), PE(mV), APC(mV), Cy7(mV),PMTtoSMR transit time(ms)]
 readout_paired = [smr_data.time(paired_smr_ind),smr_data.smr(paired_smr_ind),...
@@ -213,10 +217,10 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 %%
 %2.4485634
 %8.8485634
-median_vol_real = 668; %fL for L1210
+median_vol_real = 1100; %fL for L1210
 median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
 PMT_to_pL_conversion_factor = median_vol_real/median_vol_au; %um3
-PMT_to_pL_conversion_factor=10;
+%PMT_to_pL_conversion_factor=22.5483499895012;
 real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_pL_conversion_factor;
 real_dia = (real_vol*6/pi).^(1/3);
 real_density = smr_data.smr(paired_smr_ind)./real_vol+1.005584+0.018;
@@ -235,57 +239,95 @@ ylabel('Density (g/cm3)')
 
 
 %%
- figure(10) %density histo
-        obj2plot =real_density;
-        bin_n = round(length(obj2plot)/40);
-        h1=histogram(obj2plot);
-        h1.Normalization = 'probability';
-        h1.BinWidth = 0.0015;
-        h1.FaceColor = [0.8500 0.3250 0.0980];
-        xlabel('Density (g/cm^{3})')
-        ylabel('Probability density estimation')
-xlim([1.04,1.12])
-title('Density measurement')
-
- figure(11) %density histo
-        obj2plot =smr_data.smr(paired_smr_ind)*1.2;
-        bin_n = round(length(obj2plot)/40);
-        h1=histogram(obj2plot);
-        h1.Normalization = 'probability';
-        h1.BinWidth = 5;
-        h1.FaceColor = [0.8500 0.3250 0.0980];
-        xlabel('Buoyant mass (pg)')
-        ylabel('Probability density estimation')
-
- figure(12) %density histo
-        obj2plot =real_vol;
-        bin_n = round(length(obj2plot)/40);
-        h1=histogram(obj2plot);
-        h1.Normalization = 'probability';
-        h1.BinWidth = 50;
-        h1.FaceColor = [0.8500 0.3250 0.0980];
-        legend('Volume exclusion')
-        xlabel('Volume (fL)')
-        ylabel('Probability density estimation')
+%  figure(10) %density histo
+%         obj2plot =real_density;
+%         bin_n = round(length(obj2plot)/40);
+%         h1=histogram(obj2plot);
+%         h1.Normalization = 'probability';
+%         h1.BinWidth = 0.001;
+%         h1.FaceColor = [0.5 0.5 0.5];
+%         hold on 
+%          obj2plot =FC.density_g_cm_3_;
+%         bin_n = round(length(obj2plot)/40);
+%         h2=histogram(obj2plot);
+%         h2.Normalization = 'probability';
+%         h2.BinWidth = 0.001;
+%         h2.FaceColor = [0.9290 0.6940 0.1250];
+%         xlabel('Density (g/cm^{3})')
+%         ylabel('Probability density estimation')
+% xlim([1.04,1.09])
+% set(gca,'FontSize',15)
+% legend('Volume exclusion','Fluid exhange')
+% %title('Density measurement')
+% 
+%  figure(11) %density histo
+%         obj2plot =smr_data.smr(paired_smr_ind)*1.2;
+%         bin_n = round(length(obj2plot)/40);
+%         h1=histogram(obj2plot);
+%         h1.Normalization = 'probability';
+%         h1.BinWidth = 0.5;
+%         h1.FaceColor = [0.8500 0.3250 0.0980];
+%         xlabel('Buoyant mass (pg)')
+%         ylabel('Probability density estimation')
+%         xlim([0,40])
+%         set(gca,'FontSize',15)
+%  figure(12) %density histo
+%         obj2plot =real_vol;
+%         bin_n = round(length(obj2plot)/40);
+%         h1=histogram(obj2plot);
+%         h1.Normalization = 'probability';
+%         h1.BinWidth = 30;
+%         h1.FaceColor = [0.8500 0.3250 0.0980];
+%         
+%         xlabel('Volume (fL)')
+%         ylabel('Probability density estimation')
+%         xlim([0,1500])
+%         set(gca,'FontSize',15)
 %%
-figure(13)
-%scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
-dscatter(real_vol,real_density,'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','scatter') 
-
-ylabel('Density (g/cm^{3})')
-xlabel('Volume (fL)')
-legend('Volume exclusion')
-title('L1210 density measurement')
+% figure(13)
+% scatter(smr_data.smr(paired_smr_ind)*1.2,real_vol,20,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.4) 
+%  hold on
+%  scatter(FC.BuoyantMassInNormalRPMI_pg_,FC.volume_fL_,20,"filled", 'MarkerFaceColor',[0.9290 0.6940 0.1250],'MarkerFaceAlpha',1) 
+% %dscatter(real_vol,real_density,'SMOOTHING',10,'BINS',[3000,2000],'PLOTTYPE','scatter','msize',8) 
+% 
+% ylabel('Volume (fL)')
+% xlabel('Buoyant mass (pg)')
+%  xlim([20,110])
+%   ylim([400,2000])
+% legend('Volume exclusion','Fluid exhange')
+% set(gca,'FontSize',15)
+% pbaspect([1 1 1])
+%%
+% figure(15)
+% 
+% scatter(real_vol,real_density,6,smr_data.smr(paired_smr_ind)*1.2,'filled','MarkerFaceAlpha',0.8)
+% 
+% cmap = crameri('roma');
+% cmap = colormap(parula(5));
+% %cmap =  tab20(3);
+% %set(gca,'ColorScale','log')
+% colormap(hsv(100));
+% c=colorbar;
+% caxis([6 35]);
+% set(get(c,'title'),'string','Buoyant mass (pg)','Rotation',0);
+% ylabel('Density (g/cm^{3})')
+% xlabel('Volume (fL)')
+% 
+% xlim([0,1500])
+% ylim([1.02,1.1])
+% set(gca,'FontSize',15)
+% legend('n = 5547')
 %%
 figure(14)
-%scatter(real_vol,real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
+scatter(pmt_input{:,1}(paired_pmt_ind),real_density,10,"filled", 'MarkerFaceColor',[0.5 0.5 0.5],'MarkerFaceAlpha',.5) 
 apc = pmt_input{:,4}(paired_pmt_ind);
-dscatter(smr_data.smr(paired_smr_ind),log2(apc),'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','scatter') 
+%dscatter(smr_data.smr(paired_smr_ind),log2(apc),'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','scatter') 
 
 ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
 legend('Volume exclusion')
 title('L1210 density measurement')
+ylim([1.0,1.2])
 % %%
 % CV_volexclusion = std(real_density)/mean(real_density);
 % disp(CV_volexclusion)

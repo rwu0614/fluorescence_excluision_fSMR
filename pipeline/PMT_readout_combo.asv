@@ -40,7 +40,7 @@ addpath('plotting_functions\');
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -3; 
+    analysis_params.detect_thresh_pmt(2) = -5; 
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
@@ -49,7 +49,7 @@ addpath('plotting_functions\');
     % For signal QC filtering
     analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-4; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.02;
+    analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% ---------------- Run mode and upstream compensation determination ----------- %%
@@ -222,8 +222,8 @@ else
 end
 waitbar(1,progress_bar,QC_msg);
 pause(0.5)
-% hist(all_cell_baselineDiff_over_sig,1000)
-%  scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
+hist(all_cell_baselineDiff_over_sig,1000)
+ scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
 %% Apply compensation to fxm channel if needed by user
 if fxm_mode == 1
     fxm_compen_amp = full_readout_pmt.amplitude(:,fxm_channel);
