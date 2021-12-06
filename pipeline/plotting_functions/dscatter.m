@@ -102,12 +102,10 @@ if nargin > 2
                     logx = pval;
                     X = log10(X);
                 case 6
-                    contourFlag = pval;
-                case 7
                     marker = pval;
-                case 8
+                case 7
                     msize = pval;
-                case 9
+                case 8
                     filled = pval;
             end
         end

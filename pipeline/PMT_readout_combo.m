@@ -40,7 +40,7 @@ addpath('plotting_functions\');
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -5; 
+    analysis_params.detect_thresh_pmt(2) = -3; 
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
@@ -48,7 +48,8 @@ addpath('plotting_functions\');
     
     % For signal QC filtering
     analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
-    analysis_params.thresh_base_slope = 1.5*10^-4; % cutoff for left-right baseline slopes
+    analysis_params.thresh_base_slope = 2*10^-4; % cutoff for left-right baseline slopes
+    analysis_params.thresh_base_height_range = 0.02;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% ---------------- Run mode and upstream compensation determination ----------- %%
@@ -203,20 +204,26 @@ end
 
 %% Quality check to remove low-quality signals
 if fxm_mode == 1
+    non_nan_ind = find(~isnan(full_readout_pmt.baseline(:,fxm_channel)));
+    base_med = median(full_readout_pmt.baseline(non_nan_ind(1:round(length(non_nan_ind)*1)),fxm_channel));
+    all_base_med_norm = abs(full_readout_pmt.baseline(:,fxm_channel)-base_med);
+    base_amp_pass_ind = find(all_base_med_norm < base_med*analysis_params.thresh_base_height_range);
     all_cell_baselineDiff_over_sig = abs(full_readout_pmt.baseline_left_height(:,fxm_channel)-full_readout_pmt.baseline_right_height(:,fxm_channel))...
         ./abs(full_readout_pmt.amplitude(:,fxm_channel)-full_readout_pmt.baseline(:,fxm_channel));
     base_diff_pass_ind = find(all_cell_baselineDiff_over_sig<analysis_params.thresh_baselineDiff_over_sig);
     base_leftslope_pass_ind = find(abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)) < analysis_params.thresh_base_slope);
     base_rightslope_pass_ind = find(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)) < analysis_params.thresh_base_slope);
 
-    cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
+    cell_pass_ind =intersect(base_amp_pass_ind,intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind)));
     QC_msg = sprintf('%% %0.2f of detected signals passed QC check',100*length(cell_pass_ind)/height(full_readout_pmt.amplitude));
-    
-     waitbar(1,progress_bar,QC_msg);
-        pause(0.5)
+else
+    cell_pass_ind = 1:1:height(full_readout_pmt);
+    QC_msg = sprintf('QC check are passed');
 end
-hist(all_cell_baselineDiff_over_sig,1000)
-scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
+waitbar(1,progress_bar,QC_msg);
+pause(0.5)
+% hist(all_cell_baselineDiff_over_sig,1000)
+%  scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
 %% Apply compensation to fxm channel if needed by user
 if fxm_mode == 1
     fxm_compen_amp = full_readout_pmt.amplitude(:,fxm_channel);
