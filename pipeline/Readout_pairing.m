@@ -213,10 +213,20 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 %%
 %2.4485634
 %8.8485634
-median_vol_real = 1100; %fL for L1210
-median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
+median_vol_real = 761.8; %fL for hl60
+
+figure(20)
+scatter(pmt_input{:,3}(paired_pmt_ind),smr_data.smr(paired_smr_ind),10,'filled')
+
+%%
+[gate_x,gate_y] = draw_gating(20);
+ind_inbound_live = inpolygon(pmt_input{:,3}(paired_pmt_ind),smr_data.smr(paired_smr_ind),gate_x,gate_y);
+median_vol_au = median(pmt_input{:,3}(ind_inbound_live));
+
+% median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
 PMT_to_pL_conversion_factor = median_vol_real/median_vol_au; %um3
-PMT_to_pL_conversion_factor=10;
+disp(PMT_to_pL_conversion_factor)
+% PMT_to_pL_conversion_factor = 7.330339413;
 real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_pL_conversion_factor;
 real_dia = (real_vol*6/pi).^(1/3);
 real_density = smr_data.smr(paired_smr_ind)./real_vol+1.005584+0.018;
@@ -275,7 +285,7 @@ dscatter(real_vol,real_density,'SMOOTHING',15,'BINS',[3000,2000],'PLOTTYPE','sca
 ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
 legend('Volume exclusion')
-title('L1210 density measurement')
+title('8902 density measurement')
 
 % %%
 % CV_volexclusion = std(real_density)/mean(real_density);
@@ -283,4 +293,11 @@ title('L1210 density measurement')
 % CV_fluidexchange = std(fc)/mean(fc);
 % disp(CV_fluidexchange)
 
+%% To save plots
+% cd('\\rowley.mit.edu\manalis\richardwu\fSMR_experiment\20212025_8902_fxm\4hr\4hr_report\Pairing_report')
+%     figure_name = '8902_4hr_density_vs_vol.png';%defined figure name
+% %     experiment_name2 = strrep(experiment_name,' ','_');
+%     plot_name = [figure_name];
+%     print(gcf,plot_name,'-dpng','-r800'); 
+% cd(currentFolder)
 

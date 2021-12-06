@@ -11,7 +11,7 @@ addpath('plotting_functions\');
 % Optimize using following parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Peak_length = 100; % estimated peak length
-    datasize = 2e5;   % establish a segment size (~32Mbytes)
+    datasize = 2e4;   % establish a segment size (~32Mbytes)
     
     analysis_params.Baseline_rough_cutoff = -20; % default is -20 for populational fSMR experiments where light source is always on
     analysis_params.med_filt_length = 5; %full PMT data median filter window size, default 50
@@ -40,14 +40,14 @@ addpath('plotting_functions\');
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -5; 
+    analysis_params.detect_thresh_pmt(2) = 10; 
     analysis_params.detect_thresh_pmt(3) = 10;
-    analysis_params.detect_thresh_pmt(4) = 2.5;
+    analysis_params.detect_thresh_pmt(4) = 5;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.1; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 1.5*10^-4; % cutoff for left-right baseline slopes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -162,6 +162,8 @@ rawdata_pmt = cell(1,n_pmt_channel);
 
 segment_loop=0;
 flag = 0;
+full_readout_initialized = 0;
+
 while(flag==0)
 
     % seek data for current segement, datatype int is 8bytes
@@ -179,9 +181,10 @@ while(flag==0)
     [seg_readout_pmt,progress_msg] = P1_peakanalysis_pmt(segment_loop,num_segments,rawdata_pmt, rawdata_time_pmt, disp_params, analysis_params,input_info);
   
     if ~isempty(seg_readout_pmt)
-        if segment_loop ==0
+        if full_readout_initialized == 0
             full_readout_pmt = seg_readout_pmt;
-        else
+            full_readout_initialized = 1;
+        else        
             full_readout_pmt = vertcat(full_readout_pmt,seg_readout_pmt);
         end
         waitbar(segment_loop/num_segments,progress_bar,{progress_msg.line0,progress_msg.line1,progress_msg.line2,progress_msg.line3});
@@ -208,12 +211,14 @@ if fxm_mode == 1
 
     cell_pass_ind = intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind));
     QC_msg = sprintf('%% %0.2f of detected signals passed QC check',100*length(cell_pass_ind)/height(full_readout_pmt.amplitude));
-    
-     waitbar(1,progress_bar,QC_msg);
-        pause(0.5)
+else
+    cell_pass_ind = 1:1:height(full_readout_pmt);
+    QC_msg = sprintf('QC check are passed');
 end
-hist(all_cell_baselineDiff_over_sig,100)
-scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
+waitbar(1,progress_bar,QC_msg);
+pause(0.5)
+% hist(all_cell_baselineDiff_over_sig,1000)
+% scatter(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)),abs(full_readout_pmt.baseline_left_slope(:,fxm_channel)))
 %% Apply compensation to fxm channel if needed by user
 if fxm_mode == 1
     fxm_compen_amp = full_readout_pmt.amplitude(:,fxm_channel);
@@ -279,3 +284,29 @@ mkdir(report_dir)
 PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, analysis_params, full_readout_pmt(cell_pass_ind,:));
 report_msg = 'Generating report... done';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg,report_msg});
+%%
+scatter(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),abs(full_readout_pmt.amplitude(cell_pass_ind,4)-full_readout_pmt.baseline(cell_pass_ind,4))*1000)
+hold on
+tt = (full_readout_pmt.amplitude(cell_pass_ind,4)-(full_readout_pmt.baseline(cell_pass_ind,4)).*...
+            (full_readout_pmt.amplitude(cell_pass_ind,fxm_channel)./full_readout_pmt.baseline(cell_pass_ind,fxm_channel)));
+scatter(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),tt*1000)
+%%
+% co_check_ind = find(full_readout_pmt.signal(cell_pass_ind,fxm_channel)>10&full_readout_pmt.signal(cell_pass_ind,fxm_channel)<300);
+% co_check_ind = cell_pass_ind(co_check_ind);
+% x = abs(full_readout_pmt.signal(co_check_ind,fxm_channel));
+% y =abs((full_readout_pmt.amplitude(co_check_ind,3)-full_readout_pmt.baseline(co_check_ind,3))./full_readout_pmt.baseline(co_check_ind,3))*1000;
+% scatter(x,y)
+% temp_stats = regstats(y,x,'linear');
+% disp(temp_stats.beta(2))
+% 
+% scatter(full_readout_pmt.signal(cell_pass_ind,fxm_channel),full_readout_pmt.signal(cell_pass_ind,4))
+
+
+
+
+
+
+
+
+
+
