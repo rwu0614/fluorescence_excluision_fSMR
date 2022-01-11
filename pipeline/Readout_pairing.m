@@ -217,9 +217,9 @@ Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,tr
 %%
 %2.4485634
 %8.8485634
-median_vol_real = 1100; %fL for L1210
+median_vol_real = 1151; %fL for L1210
 median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
-PMT_to_pL_conversion_factor = median_vol_real/median_vol_au; %um3
+PMT_to_pL_conversion_factor = median_vol_real/median_vol_au %um3
 %PMT_to_pL_conversion_factor=22.5483499895012;
 real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_pL_conversion_factor;
 real_dia = (real_vol*6/pi).^(1/3);
