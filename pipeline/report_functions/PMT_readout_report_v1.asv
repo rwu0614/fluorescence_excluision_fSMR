@@ -114,20 +114,7 @@ rpt_log_sec3 =[];
 rpt_log_sec3.QC_thresh_baselineDiff_over_sig = sprintf('analysis_params.thresh_baselineDiff_over_sig = %1.5f \n', analysis_params.thresh_baselineDiff_over_sig);
 rpt_log_sec3.QC_thresh_base_slope = sprintf('analysis_params.thresh_base_slope = %1.5f \n', analysis_params.thresh_base_slope);
 rpt_log_sec3.QC_thresh_base_height_range = sprintf('analysis_params.thresh_base_height_range = %1.5f \n',analysis_params.thresh_base_height_range);
-rpt_log_sec3.QC_pass_rate = QC_msg;
-fn = fieldnames(rpt_log_sec3);
-
-rpt_title = clone(sectrpt_title());
-append(rpt_title,'QC parameters and pass rate');
-append(ch1,Section('title',rpt_title));
-for i = 1:numel(fn)
-    rpt_title = clone(paramrpt_title());
-    append(rpt_title,fn{i});
-    p = Paragraph(rpt_log_sec3.(fn{i}));
-    p.Style = paragraph_style;
-    append(ch1,Section('title',rpt_title,'Content',p));
-    %append(rpt,p);
-end
+rpt_log_sec3.QC_pass_rate = 
 
 % Section 4 Key plotting parameters
 voltage_plot_lim_lower = 1e-2;
