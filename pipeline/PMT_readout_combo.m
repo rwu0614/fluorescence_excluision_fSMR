@@ -286,7 +286,7 @@ pause(0.5)
 % generate analysis report
 report_dir = [input_info.pmt_dir{1} '\' sample_name '_report\PMT_report\'];
 mkdir(report_dir)
-PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, analysis_params, full_readout_pmt(cell_pass_ind,:));
+PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, analysis_params, full_readout_pmt(cell_pass_ind,:),QC_msg);
 report_msg = 'Generating report... done';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg,report_msg});
 %%
