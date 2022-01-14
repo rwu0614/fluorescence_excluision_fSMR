@@ -27,6 +27,13 @@ cd(input_info.pmt_dir)
 pmt_input = readtable(input_info.pmt_filename);
 cd(currentFolder)
 
+% Ask user for PMT analysis params txt file
+fprintf('\nGetting PMT analysis params txt file...')
+[input_info.params_filename, input_info.params_dir,~] = uigetfile('../*.*','Select PMT analysis params .txt File', ' ');
+fprintf('\n%s selected for analysis\n', input_info.params_filename)
+analysis_params_file_fullname = strcat(input_info.params_dir, input_info.params_filename); 
+analysis_params = readtable(analysis_params_file_fullname,'ReadRowNames',true,'ReadVariableNames',true,'Delimiter',' ');
+
 pmt_data.time=pmt_input{:,1}*1000; % ms
 pmt_data.pmt{1}=pmt_input{:,2};
 pmt_data.pmt{2}=pmt_input{:,3};
@@ -166,7 +173,7 @@ cd(currentFolder)
 % generate analysis report
 report_dir = [input_info.pmt_dir '\' sample_name '_report\Pairing_report\'];
 mkdir(report_dir)
-Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,trace, window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count);
+Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,analysis_params,trace, window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count);
 
 
 
