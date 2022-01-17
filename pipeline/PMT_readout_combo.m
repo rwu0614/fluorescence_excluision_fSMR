@@ -62,6 +62,7 @@ if isempty(find(analysis_params.detect_thresh_pmt<0, 5))
     analysis_params.fxm_mode = 0;
 else
     analysis_params.fxm_mode = 1;
+    analysis_params.fxm_channel = fxm_channel;
 end
 fxm_mode = analysis_params.fxm_mode;
 % To detemine if the user wants to input compensation factor(s) from upstream
@@ -289,6 +290,12 @@ mkdir(report_dir)
 PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, analysis_params, full_readout_pmt(cell_pass_ind,:),QC_msg);
 report_msg = 'Generating report... done';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg,report_msg});
+
+%% generate analysis params txt files 
+cd(input_info.pmt_dir{1})
+    writetable(struct2table(analysis_params),'readout_pmt_analysis_params.txt','Delimiter',' ')
+cd(currentFolder)
+
 %%
 scatter(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),abs(full_readout_pmt.amplitude(cell_pass_ind,4)-full_readout_pmt.baseline(cell_pass_ind,4))*1000)
 hold on

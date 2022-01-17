@@ -1,4 +1,4 @@
-function rpt_log_sec3 = Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,trace,window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count)
+function rpt_log_sec3 = Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,analysis_params,trace,window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count)
 
 % Readout_pairing_report.m creates a pdf report of the pairing results
 % between smr_readout and pmt_readou. The goal for the report is to
@@ -509,95 +509,157 @@ print(gcf,'-dpng','-r400','temp_high_res_image_7')
 figReporter7 =Image(which('temp_high_res_image_7.png'));
 figReporter7.Style = {ScaleToFit};
 add(ch2,figReporter7);
-%% Figure 8 Plotting mass, volume, and density comparisons before volume conversion
-rpt_title = clone(sectrpt_title());
-append(rpt_title,'Plotting mass, volume, and density comparisons before volume conversion');
-append(ch2,Section('title',rpt_title));
 
-% grab lower 99% of density measurements (filter out outliers for plotting)
-density_au = readout_paired(:,2)./readout_paired(:,4);
-dens_percentile = 99;
-dens_plot_lim_lower = 0;
-dens_plot_lim_higher = prctile(density_au, dens_percentile);
 
-p = Paragraph(['This is looking at comparisons of calculated mass, volume, '...
-    'and density. This is BEFORE applying the volume conversion factor, such that density and volume are in arbitrary units (AU). ']);
-p.Style = caption_style; 
-append(ch2,p);
+%% Figure 8 Plotting mass, volume, and density comparisons before volume conversion (FXM only)
+if analysis_params.fxm_mode == 1
+    fxm_channel = analysis_params.fxm_channel;
+    fxm_channel_column = fxm_channel+2;
+    
+    rpt_title = clone(sectrpt_title());
+    append(rpt_title,'Plotting mass, volume, and density comparisons before volume conversion');
+    append(ch2,Section('title',rpt_title));
 
-dens_plotting_percentile = Text(sprintf('Lower %1.2f pecentile of density signals were plotted to exclude extreme outliers.\n',dens_percentile));
-append(p, dens_plotting_percentile);
-p.WhiteSpace = 'preserve';
-dens_plotting_lower_cutoff = Text(sprintf('Lower density plotting limit (AU): %1.5f \n',dens_plot_lim_lower));
-append(p,dens_plotting_lower_cutoff);
-dens_plotting_higher_cutoff = Text(sprintf('Higher density plotting limit (AU): %1.5f \n',dens_plot_lim_higher));
-append(p,dens_plotting_higher_cutoff);
+    % grab lower 99% of mass, volume, and density measurements (filter out outliers for plotting)
+    density_au = readout_paired(:,2)./readout_paired(:,fxm_channel_column);
+    high_percentile = 99;
+    plot_lim_lower = 0;
+    dens_plot_lim_higher = prctile(density_au, high_percentile);
+    bm_plot_lim_higher = smr_plot_lim_higher;
+    vol_plot_lim_higher = prctile(readout_paired(:,fxm_channel_column), high_percentile);
 
-figure('OuterPosition',[0*scrsize(3) 0.2*scrsize(4) 0.92*scrsize(3) 0.7*scrsize(4)]);
+    p = Paragraph(['This is looking at comparisons of calculated mass, volume, '...
+        'and density. This is BEFORE applying the volume conversion factor, such that density and volume are in arbitrary units (AU). ']);
+    p.Style = caption_style; 
+    append(ch2,p);
 
-ha = tight_subplot(1,3,[.15 .05],[.1 .05]);
+    dens_plotting_percentile = Text(sprintf('Lower %1.2f pecentile of density signals were plotted to exclude extreme outliers.\n',high_percentile));
+    append(p, dens_plotting_percentile);
+    p.WhiteSpace = 'preserve';
+    dens_plotting_lower_cutoff = Text(sprintf('Lower density plotting limit (AU): %1.5f \n',plot_lim_lower));
+    append(p,dens_plotting_lower_cutoff);
+    dens_plotting_higher_cutoff = Text(sprintf('Higher density plotting limit (AU): %1.5f \n',dens_plot_lim_higher));
+    append(p,dens_plotting_higher_cutoff);
 
-% 99th percentile filtered density
-dens_filter_ind = find(density_au<dens_plot_lim_higher & density_au>dens_plot_lim_lower);
-filtered_density = density_au(dens_filter_ind);
 
-temp_mass = readout_paired(:,2);
-temp_vol = readout_paired(:,4);
+    figure('OuterPosition',[0*scrsize(3) 0.2*scrsize(4) 0.92*scrsize(3) 0.5*scrsize(4)]);
+    ha = tight_subplot(1,3,[.15 .05],[.1 .05]);
 
-axes(ha(1));
-scatter(temp_vol(dens_filter_ind),filtered_density,10,'filled','MarkerFaceAlpha',0.5)
-title('Density vs volume')
-xlabel('Volume (AU)')
-ylabel('Density (AU)')
-axes(ha(2));
-scatter(readout_paired(:,4),readout_paired(:,2),10,'filled','MarkerFaceAlpha',0.5)
-title('BM vs volume')
-xlabel('Volume (AU)')
-ylabel('Buoyant mass (pg)')
-axes(ha(3));
-scatter(temp_mass(dens_filter_ind),filtered_density,10,'filled','MarkerFaceAlpha',0.5)
-title('Density vs BM')
-xlabel('Buoyant mass (pg)')
-ylabel('Density (AU)')
+    temp_mass = readout_paired(:,2);
+    temp_vol = readout_paired(:,fxm_channel_column);
 
-print(gcf,'-dpng','-r400','temp_high_res_image_8')
-figReporter8 =Image(which('temp_high_res_image_8.png'));
-figReporter8.Style = {ScaleToFit};
-add(ch2,figReporter8);
+    % 99th percentile filtered mass,volume,density
+    ind_density = find(density_au<dens_plot_lim_higher & density_au>plot_lim_lower);
+    ind_bm = find(temp_mass<bm_plot_lim_higher & temp_mass>plot_lim_lower);
+    ind_vol = find(temp_vol<vol_plot_lim_higher & temp_vol>plot_lim_lower);
+    ind_plot = intersect(ind_bm, intersect(ind_vol, ind_density));
+    filtered_density = density_au(ind_plot);
+    filtered_bm = temp_mass(ind_plot);
+    filtered_vol = temp_vol(ind_plot);
 
-%% Figure 9 Plotting density (AU) over time
-rpt_title = clone(sectrpt_title());
-append(rpt_title,'Plotting density over time course of whole measurement before volume conversion');
-append(ch2,Section('title',rpt_title));
-% 
-p = Paragraph(['This plot is intended to check on the consistency of density ',...
-' over the course of the whole measurement time. The expected ',...
-'pattern of a successful measurement would be a relatively flat line with no ',...
-'slope, meaning that the sample density level is consistent throughout ',...
-'the measurement. If step wise increases or decreases are seen in this ',...
-'plot, it could mean that the pmt reference voltage was changed during an ',...
-'active measurement, resulting in altered volume measurements, leading to shifts in density '...
-'which is a huge red flag. If this occurs, the dataset ',...
-'must be truncated using time domain cutoffs to ensure all pmt events used ',...
-'for downstream analysis were recorded from the same pmt reference voltage settings ',...
-'ie. from the flatter part of this plot.']);
-p.Style = caption_style; 
-append(ch2,p);
 
-figure('OuterPosition',[0 0.5*scrsize(4) 0.95*scrsize(3) 0.3*scrsize(4)]);
+    axes(ha(1));
+    scatter(filtered_vol,filtered_density,10,'filled','MarkerFaceAlpha',0.5)
+    title('Density vs volume')
+    xlabel('Volume (AU)')
+    ylabel('Density (AU)')
+    axes(ha(2));
+    scatter(filtered_vol,filtered_bm,10,'filled','MarkerFaceAlpha',0.5)
+    title('BM vs volume')
+    xlabel('Volume (AU)')
+    ylabel('Buoyant mass (pg)')
+    axes(ha(3));
+    scatter(filtered_bm,filtered_density,10,'filled','MarkerFaceAlpha',0.5)
+    title('Density vs BM')
+    xlabel('Buoyant mass (pg)')
+    ylabel('Density (AU)')
 
-temp_time = readout_paired(:,1);
+    print(gcf,'-dpng','-r400','temp_high_res_image_8')
+    figReporter8 =Image(which('temp_high_res_image_8.png'));
+    figReporter8.Style = {ScaleToFit};
+    add(ch2,figReporter8);
 
-scatter(temp_time(dens_filter_ind),filtered_density,5,'filled');
-ylabel('Density (AU)')
-xlabel("Time (min)")
-title'(Density (AU) over time')
-%         legend(['n' '=' int2str(length(y_filtered))],'location',"northeast")
 
-print(gcf,'-dpng','-r400','temp_high_res_image_9')
-figReporter9 =Image(which('temp_high_res_image_9.png'));
-figReporter9.Style = {ScaleToFit};
-add(ch2,figReporter9);
+    
+    
+    
+% Figure 9 Plotting density (AU) over time (FXM only)
+    rpt_title = clone(sectrpt_title());
+    append(rpt_title,'Plotting density over time course of whole measurement before volume conversion');
+    append(ch2,Section('title',rpt_title));
+     
+    p = Paragraph(['This plot is intended to check on the consistency of density ',...
+    ' over the course of the whole measurement time. The expected ',...
+    'pattern of a successful measurement would be a relatively flat line with no ',...
+    'slope, meaning that the sample density level is consistent throughout ',...
+    'the measurement. If an apparent shift in density is seen, this could mean the ',...
+    'field of view was blocked by a particle, hence resulting in a biased volume readout during an ',...
+    'active measurement, which is a huge red flag. If this occurs, the dataset ',...
+    'must be truncated using time domain cutoffs to ensure all pmt events used ',...
+    'for downstream analysis were recorded from the same pmt reference voltage settings ',...
+    'ie. from the flatter part of this plot.']);
+    p.Style = caption_style; 
+    append(ch2,p);
+
+    figure('OuterPosition',[0 0.5*scrsize(4) 0.95*scrsize(3) 0.3*scrsize(4)]);
+
+    temp_time = readout_paired(:,1);
+
+    scatter(temp_time(ind_plot),filtered_density,5,'filled');
+    ylabel('Density (AU)')
+    xlabel("Time (min)")
+    title('Density (AU) over time')
+
+    print(gcf,'-dpng','-r400','temp_high_res_image_9')
+    figReporter9 =Image(which('temp_high_res_image_9.png'));
+    figReporter9.Style = {ScaleToFit};
+    add(ch2,figReporter9);
+    
+    
+    
+    % Figure 10 Plotting probably density function of density
+    rpt_title = clone(sectrpt_title());
+    append(rpt_title,'Probability density function of density');
+    append(ch2,Section('title',rpt_title));
+    
+    p = Paragraph(['This plot is intended to compare the distribution of density between the ',...
+    'first 30% and last 30% of the measurement. If they are similar, it suggests that there were no biases ',...
+    'between the beginning and end of the measurement. If t ',...
+    'slope, meaning that the sample density level is consistent throughout ',...
+    'the measurement. If an apparent shift in density is seen, this could mean the ',...
+    'field of view was blocked by a particle, hence resulting in a biased volume readout during an ',...
+    'active measurement, which is a huge red flag. If this occurs, the dataset ',...
+    'must be truncated using time domain cutoffs to ensure all pmt events used ',...
+    'for downstream analysis were recorded from the same pmt reference voltage settings ',...
+    'ie. from the flatter part of this plot.']);
+    p.Style = caption_style; 
+    append(ch2,p);
+    
+    figure()
+    ind_dens_first_30percent = round(0.3*length(filtered_density));
+    ind_dens_last_30percent = round(0.7*length(filtered_density));
+    
+    dens_first_30percent = filtered_density(1:ind_dens_first_30percent);
+    dens_last_30percent = filtered_density(ind_dens_last_30percent:end);
+    
+    [ksdensity_y_1,ksdensity_x_1] = ksdensity(dens_first_30percent,'Kernel','Box');
+    [ksdensity_y_2,ksdensity_x_2] = ksdensity(dens_last_30percent,'Kernel','Box');
+    plot(ksdensity_x_1,ksdensity_y,'LineWidth',1)
+    hold on
+    plot(ksdensity_x_2,ksdensity_2,'LineWidth',1)
+    legend('First 30% of measurement','Last 30% of measurement')
+    ylabel('Kernel density estimation')
+    xlabel('Density (au)')
+    title('Comparison between kernel density estimation of first and last 30% of density measurement')  
+    
+    print(gcf,'-dpng','-r400','temp_high_res_image_10')
+    figReporter10 =Image(which('temp_high_res_image_10.png'));
+    figReporter10.Style = {ScaleToFit};
+    add(ch2,figReporter10);
+end
+
+
+
 %%
 append(rpt,ch2);
 close(rpt)
