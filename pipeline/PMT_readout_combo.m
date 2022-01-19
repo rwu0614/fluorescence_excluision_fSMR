@@ -1,4 +1,4 @@
-clear all1
+clear all
 close all
 clc
 currentFolder = pwd;
