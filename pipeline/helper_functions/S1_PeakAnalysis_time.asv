@@ -339,7 +339,10 @@ for i=1:length(peak_idx)
         if(analysismode ~= 1)
             input('Hit ENTER to continue with analysis, CTRL+C to stop analysis......  ');
         end
-        
+
+       if sectionnumber == 0
+           break
+       end
         
         i=i+1;
     end

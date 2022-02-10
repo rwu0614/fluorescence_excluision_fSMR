@@ -135,7 +135,7 @@ loop=0;
 %Initialize estimated number of datapoints want to test
 estimated_datapoints = 50:25:800;
 
-datasizetest = 5e5;
+datasizetest = 1e6;
 num_peaks_compiled = [];
 
 for i = 1:length(estimated_datapoints)
