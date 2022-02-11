@@ -168,8 +168,8 @@ select_smrpeaks_fast;
 %% Output readout csv file
 % datasmr_good format is [tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm'];
 % to grab ND data (change in  readout_pairing.m, FBM_assembly)
- output_smr = [datasmr_good(:,1),datasmr_good(:,6)]; %time, first peakhight
-%output_smr = [datasmr_good(:,1, datasmr_good(:,3), datasmr_good(:,11)];  %
+% output_smr = [datasmr_good(:,1),datasmr_good(:,6)]; %time, first peakhight
+output_smr = [datasmr_good(:,1), datasmr_good(:,3), datasmr_good(:,11)];  % add ND as output
 
 cd(smr_dir)
 out_file_name = ['readout_smr_' sample_name '.csv'];
@@ -244,6 +244,7 @@ BM_beads = (10^12)*(beads_dens-fluid_dens)*((4/3)*pi*(beads_radi^3)); % in pg
 scaling_factor = BM_beads/median(mass_transit_fil_datafull(2,:));
 
 % chip from 04/12/21 scaling factor is 0.60779
+
  
  
  

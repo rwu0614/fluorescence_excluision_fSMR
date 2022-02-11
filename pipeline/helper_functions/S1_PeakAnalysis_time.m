@@ -50,7 +50,7 @@ end
 %% ================== estimated data points per frequency peak & noise in system ==============
 %added 03/22/2019
 estimated_datapoints = 800; %for full transit; deafult
-estimated_noise = 1.78; %Hz
+estimated_noise = 1; %Hz
 
 
 sgolay_length_idx = 1; %this will make default length of 5 for 50 idx transits
@@ -95,7 +95,7 @@ diff_threshold = 0.005;      % Find extremely flat part of curve (sys1)
 med_filt_wd = 200;           % window of median filter, which removes the flat part in the anti-node
 bs_dev_thres = 0.5;         % baseline dev_threshold; threshold used to remove the flat part in the anti-node
 unqPeakDist=150;            % distance over which is a unique 2nd mode peaks,default 200
-offset_input = 5;             % baseline offset to select for peaks
+offset_input = 2;             % baseline offset to select for peaks
 
 %% added 03222019 - compensate for number of data points & noise leve;
 diff_threshold = diff_threshold*((estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
@@ -118,6 +118,21 @@ mf_ydata_thres=medfilt1(ydata(idx), med_filt_wd);
 idx_f=find(abs(ydata(idx)-mf_ydata_thres)<bs_dev_thres);
 
 idx=idx(idx_f);
+
+if length(idx)<=1                   %% add on 01242022 by Ye
+    if isempty(idx)
+        disp('No GOOD peak found in this section: idx Length == 0');
+    else
+        disp('No GOOD peak found in this section: idx Length == 1');
+    end
+    data=zeros(13,1); 
+    disp(' '); 
+    elapsed_time = elapsed_time + t(end);  return;
+end
+
+idx
+xdata(idx)
+ydata(idx)
 
 ydata_thres=interp1(xdata(idx), ydata(idx), xdata);
 

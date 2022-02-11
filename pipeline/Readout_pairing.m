@@ -213,8 +213,8 @@ disp(cell_1_cv*100)
 %8.8485634
 median_vol_real = 1100; %fL for L1210
 median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
-PMT_to_pL_conversion_factor = median_vol_real/median_vol_au; %um3
-real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_pL_conversion_factor;
+PMT_to_fL_conversion_factor = median_vol_real/median_vol_au; %um3
+real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_fL_conversion_factor;
 real_dia = (real_vol*6/pi).^(1/3);
 real_density = smr_data.smr(paired_smr_ind)./real_vol+1.005584+0.018;
 figure (1)

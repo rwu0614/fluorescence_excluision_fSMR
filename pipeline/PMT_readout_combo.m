@@ -35,13 +35,13 @@ addpath('plotting_functions\');
     
     % This is for setting detection threshold for each PMT channel,
     % threshold is in the unit of standard deviation of baseline amplitude
-    % i.e. noise level
+    % i.e. noise level0
     % *************** IMPORTANT******************
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = 3;  % change from -5 to -3
-    analysis_params.detect_thresh_pmt(3) = 3;
+    analysis_params.detect_thresh_pmt(2) = -3;  % change from -5
+    analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
