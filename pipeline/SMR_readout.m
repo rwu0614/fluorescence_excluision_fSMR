@@ -169,7 +169,7 @@ select_smrpeaks_fast;
 % datasmr_good format is [tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm'];
 % to grab ND data (change in  readout_pairing.m, FBM_assembly)
 % output_smr = [datasmr_good(:,1),datasmr_good(:,6)]; %time, first peakhight
-output_smr = [datasmr_good(:,1), datasmr_good(:,3), datasmr_good(:,11)];  % add ND as output
+output_smr = [datasmr_good(:,1), datasmr_good(:,3), datasmr_good(:,11)];  % add ND as output 02/11/2022
 
 cd(smr_dir)
 out_file_name = ['readout_smr_' sample_name '.csv'];
