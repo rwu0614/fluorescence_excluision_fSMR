@@ -40,16 +40,16 @@ addpath('plotting_functions\');
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -2; 
+    analysis_params.detect_thresh_pmt(2) = -3; 
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
-    analysis_params.thresh_base_slope = 2*10^-4; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.5;
+    analysis_params.thresh_baselineDiff_over_sig = 0.5; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
+    analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% ---------------- Run mode and upstream compensation determination ----------- %%

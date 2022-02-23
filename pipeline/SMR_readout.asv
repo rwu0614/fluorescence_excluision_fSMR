@@ -110,7 +110,7 @@ if analysismode == 1
 else
     dispprogress = 1;
 end
-analysisparams = [analysismode dispprogress]; % This is for passing parameters to downstream functions       
+analysisparams.analysismode = analysismode dispprogress; % This is for passing parameters to downstream functions       
 
 % Set real-time reporting screensize
 if dispprogress == 1
@@ -135,7 +135,7 @@ loop=0;
 %Initialize estimated number of datapoints want to test
 estimated_datapoints = 50:25:800;
 
-datasizetest = 1e6;
+datasizetest = 5e5;
 num_peaks_compiled = [];
 
 for i = 1:length(estimated_datapoints)
