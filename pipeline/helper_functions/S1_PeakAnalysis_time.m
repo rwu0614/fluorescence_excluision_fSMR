@@ -50,7 +50,7 @@ end
 %% ================== estimated data points per frequency peak & noise in system ==============
 %added 03/22/2019
 % estimated_datapoints = 200; %for full transit; deafult
-estimated_noise = 5; %Hz
+analysis_params.estimated_noise = 5; %Hz
 
 
 sgolay_length_idx = 1; %this will make default length of 5 for 50 idx transits
@@ -73,7 +73,7 @@ end
 % 
 % fprintf('estimated noise level is %2.3f', measured_noise); disp(' ');
 % input('check if the filtering is okay and your noise level');
-% estimated_noise = measured_noise;
+% analysis_params.estimated_noise = measured_noise;
 end    
 
 
@@ -98,9 +98,9 @@ analysis_params.unqPeakDist =150;            % distance over which is a unique 2
 analysis_params.offset_input = 5;             % baseline offset to select for peaks
 
 %% added 03222019 - compensate for number of data points & noise leve;
-analysis_params.diff_threshold = analysis_params.diff_threshold*((estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
+analysis_params.diff_threshold = analysis_params.diff_threshold*((analysis_params.estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
 analysis_params.med_filt_wd = round(analysis_params.med_filt_wd * estimated_datapoints/400);
-analysis_params.bs_dev_thres = analysis_params.bs_dev_thres*((estimated_noise/0.1)^(1/2));
+analysis_params.bs_dev_thres = analysis_params.bs_dev_thres*((analysis_params.estimated_noise/0.1)^(1/2));
 analysis_params.unqPeakDist = round(analysis_params.unqPeakDist*estimated_datapoints/400);
 
 

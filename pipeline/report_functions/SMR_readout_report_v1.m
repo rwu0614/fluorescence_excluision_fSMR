@@ -1,4 +1,4 @@
-function  SMR_readout_report_v1(report_dir,input_info,sample_name, datasmr_good, output_smr, analysis_params)
+function  SMR_readout_report_v1(report_dir,input_info,sample_name, datasmr_good, output_smr, number_bad_peaks, analysis_params)
 % PMT_report.m creates a html report of a newly completed analysis from PMT_readout.m
 % where fluorescent events were recognized from raw PMT data. The goal for the report is to
 % bookmark key parameters from the original analysis for future replication
@@ -86,6 +86,7 @@ rpt_log_sec2.Analysis_parameter_7 = sprintf('analysis_params.stdevmultiplier = %
 rpt_log_sec2.Analysis_parameter_8 = sprintf('analysis_params.diffmultiplier = %1.5f \n', analysis_params.diffmultiplier);
 rpt_log_sec2.Analysis_parameter_9 = sprintf('analysis_params.winsize = 150 = %1.5f \n', analysis_params.winsize);
 rpt_log_sec2.Analysis_parameter_10 = sprintf('analysis_params.estimated_datapoints_optimized = %1.5f \n', analysis_params.estimated_datapoints_optimized);
+rpt_log_sec2.Analysis_parameter_11 = sprintf('analysis_params.estimated_noise (Hz) = %1.5f \n', analysis_params.estimated_noise);
 fn = fieldnames(rpt_log_sec2);
 
 rpt_title = clone(sectrpt_title());
@@ -100,25 +101,25 @@ for i = 1:numel(fn)
     %append(rpt,p);
 end
 
-% Section 3 QC parameters
-% rpt_log_sec3 =[];
-% rpt_log_sec3.QC_thresh_baselineDiff_over_sig = sprintf('analysis_params.thresh_baselineDiff_over_sig = %1.5f \n', analysis_params.thresh_baselineDiff_over_sig);
-% rpt_log_sec3.QC_thresh_base_slope = sprintf('analysis_params.thresh_base_slope = %1.5f \n', analysis_params.thresh_base_slope);
+% Section 3 Peak numbers
+rpt_log_sec3 =[];
+rpt_log_sec3.good_peaks_num = sprintf('Number of good peaks = %1.5f \n', length(output_smr));
+rpt_log_sec3.bad_peaks_num = sprintf('Number of discarded peaks = %1.5f \n', number_bad_peaks);
 % rpt_log_sec3.QC_thresh_base_height_range = sprintf('analysis_params.thresh_base_height_range = %1.5f \n',analysis_params.thresh_base_height_range);
 % rpt_log_sec3.QC_pass_rate = QC_msg;
-% fn = fieldnames(rpt_log_sec3);
-% 
-% rpt_title = clone(sectrpt_title());
-% append(rpt_title,'QC parameters and pass rate');
-% append(ch1,Section('title',rpt_title));
-% for i = 1:numel(fn)
-%     rpt_title = clone(paramrpt_title());
-%     append(rpt_title,fn{i});
-%     p = Paragraph(rpt_log_sec3.(fn{i}));
-%     p.Style = paragraph_style;
-%     append(ch1,Section('title',rpt_title,'Content',p));
-%     %append(rpt,p);
-% end
+fn = fieldnames(rpt_log_sec3);
+
+rpt_title = clone(sectrpt_title());
+append(rpt_title,'Peak numbers');
+append(ch1,Section('title',rpt_title));
+for i = 1:numel(fn)
+    rpt_title = clone(paramrpt_title());
+    append(rpt_title,fn{i});
+    p = Paragraph(rpt_log_sec3.(fn{i}));
+    p.Style = paragraph_style;
+    append(ch1,Section('title',rpt_title,'Content',p));
+    %append(rpt,p);
+end
 
 % Section 4 Key plotting parameters
 % voltage_plot_lim_lower = 1e-2;

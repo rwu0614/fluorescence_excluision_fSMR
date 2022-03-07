@@ -211,7 +211,7 @@ cd(currentFolder)
 
 report_dir = [input_info.smr_dir '\' sample_name '_report\SMR_report\'];
 mkdir(report_dir)
-SMR_readout_report_v1(report_dir,input_info,sample_name, datasmr_good, output_smr, analysis_params)
+SMR_readout_report_v1(report_dir,input_info,sample_name, datasmr_good, output_smr, number_bad_peaks, analysis_params)
 
 
 %% Create report figures

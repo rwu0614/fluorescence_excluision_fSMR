@@ -1,6 +1,6 @@
 global datafull
 global datasmr_good
-global number_bad_peaks
+global datasmr_bad
 S3_Merge;
 noise = 15;
 coeff_peak_bal = 0.1; %the peak imbalance in percentage relative to mean mass
@@ -11,4 +11,3 @@ idx_discard = find(abs((datasmr(:,6)-datasmr(:,8))./datasmr(:,3)) > coeff_peak_b
 
 datasmr_good = datasmr;
 datasmr_good(idx_discard,:)=[];
-number_bad_peaks = length(idx_discard);

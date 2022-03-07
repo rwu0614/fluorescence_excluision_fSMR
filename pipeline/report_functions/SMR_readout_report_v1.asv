@@ -86,6 +86,7 @@ rpt_log_sec2.Analysis_parameter_7 = sprintf('analysis_params.stdevmultiplier = %
 rpt_log_sec2.Analysis_parameter_8 = sprintf('analysis_params.diffmultiplier = %1.5f \n', analysis_params.diffmultiplier);
 rpt_log_sec2.Analysis_parameter_9 = sprintf('analysis_params.winsize = 150 = %1.5f \n', analysis_params.winsize);
 rpt_log_sec2.Analysis_parameter_10 = sprintf('analysis_params.estimated_datapoints_optimized = %1.5f \n', analysis_params.estimated_datapoints_optimized);
+rpt_log_sec2.Analysis_parameter_11 = sprintf('analysis_params.estimated_noise (Hz) = %1.5f \n', analysis_params.estimated_noise);
 fn = fieldnames(rpt_log_sec2);
 
 rpt_title = clone(sectrpt_title());
@@ -268,14 +269,14 @@ append(ch2,Section('title',rpt_title));
 
 figure('OuterPosition',[0 0.5*scrsize(4) 0.95*scrsize(3) 0.3*scrsize(4)]);
 
-histogram(mass_transit_fil_datafull(2,:),150)
-xlabel('Frequency shift (Hz)')
+histogram(datasmr_good(:,20),150)
+xlabel('Peak width')
 ylabel('Counts')
 
-print(gcf,'-dpng','-r400','temp_high_res_image_3')
-figReporter3 =Image(which('temp_high_res_image_3.png'));
-figReporter3.Style = {ScaleToFit};
-add(ch2,figReporter3);
+print(gcf,'-dpng','-r400','temp_high_res_image_5')
+figReporter5 =Image(which('temp_high_res_image_5.png'));
+figReporter5.Style = {ScaleToFit};
+add(ch2,figReporter5);
 %%
 append(rpt,ch2);
 close(rpt)
