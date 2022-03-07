@@ -47,9 +47,9 @@ addpath('plotting_functions\');
     
     
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
-    analysis_params.thresh_base_slope = 2*10^-4; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.02;
+    analysis_params.thresh_baselineDiff_over_sig = 0.5; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
+    analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% ---------------- Run mode and upstream compensation determination ----------- %%
