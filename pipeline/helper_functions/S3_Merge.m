@@ -21,6 +21,7 @@ sectnum=[];
 bd=[];
 pkorder=[];
 vs=[];
+wth = []; %peak width
 
 % filter out zero columns
 idx_nonzero=find(datafull(12,:)>0);
@@ -57,6 +58,7 @@ for i=1:length(idx)
     sectnum(i)=datafull_processed(10, temp_idx(1)); %sectnum 
     bd(i)=datafull_processed(6, temp_idx(1)); % added by JK (transit time in ms)
     pkorder(i)=datafull_processed(12,temp_idx(1));
+    wth(i) = datafull_processed(3,temp_idx(1));
     
 %     if(abs(datafull(7,temp_idx(1)))>0.001)
 %     if(abs(datafull(6,temp_idx(1)))>800)
@@ -72,7 +74,7 @@ for i=1:length(idx)
 end
 
 
-datasmr=[tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm'];
+datasmr=[tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm' wth'];
 % idx=find(abs(data(:,10))<10);
 % data=data(idx,:);
 datafull_processed = datafull_processed';

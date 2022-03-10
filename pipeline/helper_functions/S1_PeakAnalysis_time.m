@@ -1,4 +1,4 @@
-function data = S1_PeakAnalysis_time(x, t, datalast, sectionnumber, analysisparam)
+function [data, analysis_params] = S1_PeakAnalysis_time(x, t, datalast, sectionnumber, analysisparams, estimated_datapoints)
 
 global xdata
 global ydata
@@ -10,8 +10,8 @@ global samplepeak
 global sampletime 
 global sidelength;
 
-analysismode = analysisparam(1);
-dispprogress = analysisparam(2);
+analysis_params.analysismode = analysisparams.analysismode;
+analysis_params.dispprogress = analysisparams.dispprogress;
 vv = zeros(length(x),1);
 % clear all S1 variables
 pkidx_poly = [];
@@ -49,8 +49,8 @@ end
 
 %% ================== estimated data points per frequency peak & noise in system ==============
 %added 03/22/2019
-estimated_datapoints = 200; %for full transit; deafult
-estimated_noise = 1.78; %Hz
+% estimated_datapoints = 200; %for full transit; deafult
+analysis_params.estimated_noise = 5; %Hz
 
 
 sgolay_length_idx = 1; %this will make default length of 5 for 50 idx transits
@@ -73,7 +73,7 @@ end
 % 
 % fprintf('estimated noise level is %2.3f', measured_noise); disp(' ');
 % input('check if the filtering is okay and your noise level');
-% estimated_noise = measured_noise;
+% analysis_params.estimated_noise = measured_noise;
 end    
 
 
@@ -91,31 +91,31 @@ xdata = [1:length(ydata)]';
 % Baseline selection
 % Optimize using below parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-diff_threshold = 0.005;      % Find extremely flat part of curve (sys1)
-med_filt_wd = 200;           % window of median filter, which removes the flat part in the anti-node
-bs_dev_thres = 0.5;         % baseline dev_threshold; threshold used to remove the flat part in the anti-node
-unqPeakDist=150;            % distance over which is a unique 2nd mode peaks,default 200
-offset_input = 5;             % baseline offset to select for peaks
+analysis_params.diff_threshold = 0.005;      % Find extremely flat part of curve (sys1)
+analysis_params.med_filt_wd = 200;           % window of median filter, which removes the flat part in the anti-node
+analysis_params.bs_dev_thres = 0.5;         % baseline dev_threshold; threshold used to remove the flat part in the anti-node
+analysis_params.unqPeakDist =150;            % distance over which is a unique 2nd mode peaks,default 200
+analysis_params.offset_input = 5;             % baseline offset to select for peaks
 
 %% added 03222019 - compensate for number of data points & noise leve;
-diff_threshold = diff_threshold*((estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
-med_filt_wd = round(med_filt_wd * estimated_datapoints/400);
-bs_dev_thres = bs_dev_thres*((estimated_noise/0.1)^(1/2));
-unqPeakDist = round(unqPeakDist*estimated_datapoints/400);
+analysis_params.diff_threshold = analysis_params.diff_threshold*((analysis_params.estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
+analysis_params.med_filt_wd = round(analysis_params.med_filt_wd * estimated_datapoints/400);
+analysis_params.bs_dev_thres = analysis_params.bs_dev_thres*((analysis_params.estimated_noise/0.1)^(1/2));
+analysis_params.unqPeakDist = round(analysis_params.unqPeakDist*estimated_datapoints/400);
 
 
 size(ydata)
 
-idx = find(abs(diff(ydata))<diff_threshold); %remove fast varying points to get baseline. i.e., remove cell frequency                                                  
+idx = find(abs(diff(ydata))<analysis_params.diff_threshold); %remove fast varying points to get baseline. i.e., remove cell frequency                                                  
 
 size(idx)
 
 
 % ignore the flat points found over the anti-node
-mf_ydata_thres=medfilt1(ydata(idx), med_filt_wd);
+mf_ydata_thres=medfilt1(ydata(idx), analysis_params.med_filt_wd);
 
 
-idx_f=find(abs(ydata(idx)-mf_ydata_thres)<bs_dev_thres);
+idx_f=find(abs(ydata(idx)-mf_ydata_thres)<analysis_params.bs_dev_thres);
 
 idx=idx(idx_f);
 
@@ -123,7 +123,7 @@ ydata_thres=interp1(xdata(idx), ydata(idx), xdata);
 
 size(ydata_thres)
 
-ydata_thres=ydata_thres-offset_input;
+ydata_thres=ydata_thres-analysis_params.offset_input;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,7 +146,7 @@ while(repeatflag == 1)
             peak_idx(i) = global_idx_max(1);                                                       % convert the apex index to the global index within y_diff      
         end
         
-        unique_peaks = diff([peak_idx length(xdata)]) > unqPeakDist;
+        unique_peaks = diff([peak_idx length(xdata)]) > analysis_params.unqPeakDist;
         peak_idx = peak_idx(unique_peaks);                                                      % which for single-cell 2nd-mode peaks are 3n+1, and thus we are saving the each third peak
                                                                                                 %%% now we have the global indices of the main peaks in this segment of
                                                                                                 %%% the entire frequency data 
@@ -193,7 +193,7 @@ segment_threshold = segment_threshold*estimated_datapoints/400;
 sidelength = 3000; %number of more indices on each side of baseline 
  
 for i=1:length(peak_idx)
-    
+
     if min(abs(peak_idx(i)-segmentbound(i)), abs(peak_idx(i)-segmentbound(i+1))) > segment_threshold
     
         local_xdata = xdata(segmentbound(i):segmentbound(i + 1)) - xdata(segmentbound(i)) + 1;
@@ -203,18 +203,18 @@ for i=1:length(peak_idx)
         
     
     %%%%%%%% USER ADJUSTABLE (Below is assuming 400 data points per transit) %%%%%%%%
-    edgethres = 0.12;               % choose the first point left/right of the secondary peaks 40% percent of the average baseline freqvalue
-    stdevmultiplier = 3;         % allow 102% of the minimum standard deviation
-    diffmultiplier = 0.9;           % allow 90% of the deviation from mean frequency closest to 2ndary peaks
-    winsize = 150;                  % number of points searching for baseline collection
+    analysis_params.edgethres = 0.12;               % choose the first point left/right of the secondary peaks 40% percent of the average baseline freqvalue
+    analysis_params.stdevmultiplier = 3;         % allow 102% of the minimum standard deviation
+    analysis_params.diffmultiplier = 0.9;           % allow 90% of the deviation from mean frequency closest to 2ndary peaks
+    analysis_params.winsize = 150;                  % number of points searching for baseline collection
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    baseparams = [stdevmultiplier diffmultiplier edgethres winsize diff_threshold med_filt_wd bs_dev_thres];
+    baseparams = [analysis_params.stdevmultiplier analysis_params.diffmultiplier analysis_params.edgethres analysis_params.winsize analysis_params.diff_threshold analysis_params.med_filt_wd analysis_params.bs_dev_thres];
     
     %%% Identify primary and secondary peaks within segment:
 %     disp(' ')
 %     disp('Locating segment peaks...')
-    peaks = S2_PeaksetFinder(local_xdata, local_ydata, offset_input, baseparams, analysismode);  
+    peaks = S2_PeaksetFinder(local_xdata, local_ydata, analysis_params.offset_input, baseparams, analysis_params.analysismode);  
 %     disp('...Done.')
     
     if numel(peaks)==3
@@ -225,7 +225,7 @@ for i=1:length(peak_idx)
 %     disp(' ')
 %     disp('Identifying baseline...')
     
-    [left_base, right_base, edgeidx] = S2_BaselineFinder(local_xdata, local_ydata, peaks, baseparams, peakdist_temp, analysismode);  
+    [left_base, right_base, edgeidx] = S2_BaselineFinder(local_xdata, local_ydata, peaks, baseparams, peakdist_temp, analysis_params.analysismode);  
     if(numel(left_base) == 0 || numel(right_base) == 0 || numel(edgeidx) == 0 || numel(peaks) == 0)
     i=i+1;   
     else
@@ -249,7 +249,7 @@ for i=1:length(peak_idx)
         %disp(' ')
         %disp('Performing polynomial fit on segment peaks...')
         [local_pkidx_poly, local_pkht_poly, local_apkidx_poly, local_apkht_poly, local_baselineslope, local_htdiff_poly, local_ahtdiff_poly] ...
-            = S2_PeakFitter(pk_xdata, pk_ydata, local_baseline, local_peaks, local_peakwidth, dispprogress); 
+            = S2_PeakFitter(pk_xdata, pk_ydata, local_baseline, local_peaks, local_peakwidth, analysis_params.dispprogress); 
         %disp('...Done.')
         %disp(' ')
         
@@ -296,7 +296,7 @@ for i=1:length(peak_idx)
         sectnum = [sectnum sectionnumber*ones(1,length(peaks))];
 
        
-         if dispprogress == 1
+         if analysis_params.dispprogress == 1
           hold off; drawnow;
             figure(1);
        
@@ -336,11 +336,10 @@ for i=1:length(peak_idx)
             clc
          end
         
-        if(analysismode ~= 1)
+        if(analysis_params.analysismode ~= 1)
             input('Hit ENTER to continue with analysis, CTRL+C to stop analysis......  ');
         end
-
-       
+        
         
         i=i+1;
     end
