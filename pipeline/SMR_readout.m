@@ -136,7 +136,7 @@ datafull = zeros(13,1); %total of 13 features
 loop=0;
 
 %Initialize estimated number of datapoints want to test
-estimated_datapoints = 50:50:800;
+estimated_datapoints = 80:10:300;
 
 datasizetest = 5e5;
 num_peaks_compiled = [];

@@ -42,8 +42,8 @@ pmt_data.pmt{4}=pmt_input{:,5};
 pmt_data.pmt{5}=pmt_input{:,6};
 
 %% SMR data conversion from hz to pg
-smr_data.chipID = '505_20211119';
-smr_data.Hz2pg_conversion_factor = 0.64982;
+smr_data.chipID = '';
+smr_data.Hz2pg_conversion_factor = 0.58691;
 smr_data.smr=smr_input{:,2}*smr_data.Hz2pg_conversion_factor; % convert from Hz to pg
 
 % fil_smr_ind = find(smr_data.smr>50);
@@ -334,11 +334,28 @@ ylabel('Density (g/cm^{3})')
 xlabel('Volume (fL)')
 legend('Volume exclusion')
 title('L1210 density measurement')
-ylim([1.0,1.2])
+%ylim([1.0,1.2])
 % %%
 % CV_volexclusion = std(real_density)/mean(real_density);
 % disp(CV_volexclusion)
 % CV_fluidexchange = std(fc)/mean(fc);
 % disp(CV_fluidexchange)
+
+%%
+figure(15)
+median_vol = medfilt1(smr_data.smr(paired_smr_ind),2000);
+
+plot(median_vol)
+figure(16)
+median_vol = medfilt1(real_vol,2000);
+
+plot(median_vol)
+
+figure(17)
+median_vol = medfilt1(real_density,500);
+
+plot(median_vol)
+
+
 
 

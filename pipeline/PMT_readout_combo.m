@@ -317,7 +317,8 @@ scatter(full_readout_pmt.signal(cell_pass_ind,fxm_channel),full_readout_pmt.sign
 
 
 
-
+%%
+plot(medfilt1(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),500))
 
 
 

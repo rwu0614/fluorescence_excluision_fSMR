@@ -65,7 +65,7 @@ else
 end
 
 
-%% Data preprocessing
+%% Main analysis
 
 % seek data for current segement, datatype int is 8bytes
 
@@ -87,14 +87,14 @@ fclose(smr_file_ID);
 
 rawdata_smr_time = fread(smr_time_file_ID,'float64=>double');
 rawdata_smr_time(1)=[];
-%% Interpolting pmt time variable to sync up with smr time
+%%
 pmt_time_diff = diff(rawdata_time_pmt);
 pmt_time_stamp_ind = find(pmt_time_diff~=0);
 time_x_ind = 1:1:length(rawdata_time_pmt);
 pmt_time_interp = interp1(time_x_ind(pmt_time_stamp_ind),rawdata_time_pmt(pmt_time_stamp_ind),time_x_ind);
 pmt_time_interp(1) = pmt_time_interp(2);
 pmt_time_interp(end-5:end) = pmt_time_interp(end-6) ;
-%% Visualize smr and pmt signal together to locate target cell
+%%
 figure(1)
 initial_ind = 1:1:200000;
 plot(rawdata_smr_time(200000:1:300000),rawdata_smr(200000:1:300000))
@@ -103,13 +103,13 @@ hold on
 yyaxis right
 plot(pmt_time_interp(initial_ind),rawdata_pmt(initial_ind))
 ylim([0,5])
-%% Plot example data
+%%
 fig = figure;
 left_color = [0 0.4470 0.7410];
 right_color = [0.4660 0.6740 0.1880];
 set(fig,'defaultAxesColorOrder',[left_color; right_color]);
 rawdata_smr_norm = rawdata_smr-median(rawdata_smr(1:1:200000));
-t_entrance = 3.713265608673*10^12; % this is the starting time for the target cell
+t_entrance = 3.713265608673*10^12;
 syn_smr_time = rawdata_smr_time*1000-t_entrance;
 [~,t_smr_enter_ind] = min(abs(syn_smr_time));
 syn_pmt_time = pmt_time_interp*1000-t_entrance;
