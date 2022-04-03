@@ -36,7 +36,7 @@ pmt_data.pmt{5}=pmt_input{:,6};
 
 %% SMR data conversion from hz to pg
 smr_data.chipID = 'G5W2 505-B15-L';
-smr_data.Hz2pg_conversion_factor = 0.59553;
+smr_data.Hz2pg_conversion_factor = 0.6; % change from 0.59553 to 0.6 03/27/2022
 smr_data.smr=smr_input{:,2}*smr_data.Hz2pg_conversion_factor; % convert from Hz to pg
 smr_data.ND = smr_input{:,3}; % 02/11/2022
 % fil_smr_ind = find(smr_data.smr>50);
@@ -149,12 +149,12 @@ paired_delta_t = uni_paired_delta_t(uni_paried_ind_smr_pmt);
 n = length(paired_pmt_ind);
 multiplet_count = length(pre_filt_paired_pmt_ind)-n;
 %% Generate output
-%format follows: [time of detection(computer real time), smr(pg),ND(Hz),PacificBlue(mV),FITC(mV), PE(mV), APC(mV), Cy7(mV),PMTtoSMR transit time(ms)]
+%format follows: [time of detection(computer real time), smr(pg),PacificBlue(mV),FITC(mV), PE(mV), APC(mV), Cy7(mV),PMTtoSMR transit time(ms), ND(Hz)]
 % add ND in output 02/11/2022
-readout_paired = [smr_data.time(paired_smr_ind),smr_data.smr(paired_smr_ind),smr_data.ND(paired_smr_ind)...
+readout_paired = [smr_data.time(paired_smr_ind),smr_data.smr(paired_smr_ind),...
     pmt_input{:,2}(paired_pmt_ind),pmt_input{:,3}(paired_pmt_ind),...
     pmt_input{:,4}(paired_pmt_ind),pmt_input{:,5}(paired_pmt_ind),...
-    pmt_input{:,6}(paired_pmt_ind),paired_delta_t];
+    pmt_input{:,6}(paired_pmt_ind),paired_delta_t,smr_data.ND(paired_smr_ind)];
 cd(input_info.pmt_dir)
 out_file_name = ['Readout_paired_' sample_name '.csv'];
 dlmwrite(out_file_name, readout_paired, 'delimiter', ',', 'precision', 25);

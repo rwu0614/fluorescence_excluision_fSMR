@@ -47,7 +47,8 @@ while exitflag == 0
     edgeidx(2) = rightedgesearch(idx_idx2);
     
 
-    sidelength=round(0.25*peakdist); offset_length=0;
+    sidelength=round(peakdist); % change from 0.25*peakdist
+    offset_length=20;   % change from 0
     
     left_base = max(edgeidx(1)-sidelength-offset_length,1):1:edgeidx(1)-offset_length;
     right_base = edgeidx(2)+offset_length:1:min(edgeidx(2)+sidelength+offset_length, length(ydata));

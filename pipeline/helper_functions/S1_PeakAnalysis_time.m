@@ -49,8 +49,8 @@ end
 
 %% ================== estimated data points per frequency peak & noise in system ==============
 %added 03/22/2019
-estimated_datapoints = 800; %for full transit; deafult
-estimated_noise = 1; %Hz
+estimated_datapoints = 600; %for full transit; deafult
+estimated_noise = 0.6; %Hz
 
 
 sgolay_length_idx = 1; %this will make default length of 5 for 50 idx transits
@@ -67,13 +67,12 @@ else
 legend('raw', 'sgolay 3-5');
 end
 
-% noise_estimate_frame = input('What is the x-axis frame for estimating noise? [_,_]');
-% 
-% measured_noise = std(xtest(noise_estimate_frame));
-% 
-% fprintf('estimated noise level is %2.3f', measured_noise); disp(' ');
-% input('check if the filtering is okay and your noise level');
-% estimated_noise = measured_noise;
+%noise_estimate_frame = input('What is the x-axis frame for estimating noise? [_,_]');
+%measured_noise = std(xtest(noise_estimate_frame));
+measured_noise = std(xtest([1:10000]));
+fprintf('estimated noise level is %2.3f', measured_noise); disp(' ');
+input('check if the filtering is okay and your noise level');
+estimated_noise = measured_noise;
 end    
 
 
@@ -95,7 +94,7 @@ diff_threshold = 0.005;      % Find extremely flat part of curve (sys1)
 med_filt_wd = 200;           % window of median filter, which removes the flat part in the anti-node
 bs_dev_thres = 0.5;         % baseline dev_threshold; threshold used to remove the flat part in the anti-node
 unqPeakDist=150;            % distance over which is a unique 2nd mode peaks,default 200
-offset_input = 2;             % baseline offset to select for peaks
+offset_input = 3;             % baseline offset to select for peaks
 
 %% added 03222019 - compensate for number of data points & noise leve;
 diff_threshold = diff_threshold*((estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
@@ -104,11 +103,7 @@ bs_dev_thres = bs_dev_thres*((estimated_noise/0.1)^(1/2));
 unqPeakDist = round(unqPeakDist*estimated_datapoints/400);
 
 
-size(ydata)
-
 idx = find(abs(diff(ydata))<diff_threshold); %remove fast varying points to get baseline. i.e., remove cell frequency                                                  
-
-size(idx)
 
 
 % ignore the flat points found over the anti-node
@@ -129,10 +124,6 @@ if length(idx)<=1                   %% add on 01242022 by Ye
     disp(' '); 
     elapsed_time = elapsed_time + t(end);  return;
 end
-
-idx
-xdata(idx)
-ydata(idx)
 
 ydata_thres=interp1(xdata(idx), ydata(idx), xdata);
 

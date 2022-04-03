@@ -159,7 +159,7 @@ pause(0.5)
 n_out_features = 6; % total number of output features per detected signal, ie time, pmt, length, shape factors
 
 rawdata_pmt = cell(1,n_pmt_channel);
-
+full_readout_pmt=[];
 segment_loop=0;
 flag = 0;
 while(flag==0)
