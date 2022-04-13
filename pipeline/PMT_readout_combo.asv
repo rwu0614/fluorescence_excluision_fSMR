@@ -1,4 +1,4 @@
-function pass_rate = PMT_readout_combo(varargin)
+function PMT_readout_combo(varargin)
 % input should be empty for one-time execution on a single sample. For
 % batch analysis, use PMT_readout_combo(input_directory,batch_analysis_params)
 % batch_analysis_params should have the same field as the analysis_params
@@ -15,6 +15,7 @@ addpath('report_functions\');
 addpath('helper_functions\');
 addpath('plotting_functions\');
 
+disp(varargin)
 %writing global variables to connect with other .m files in the pipeline
 global elapsed_time
 global elapsed_index
@@ -30,13 +31,13 @@ if nargin==0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Optimize using following parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    analysis_params.Peak_length = 100; % estimated peak length
-    analysis_params.datasize = 2e4;   % establish a segment size (~32Mbytes)
+    analysis_params_pmt.Peak_length = 100; % estimated peak length
+    analysis_params_pmt.datasize = 2e4;   % establish a segment size (~32Mbytes)
     
     analysis_params.Baseline_rough_cutoff = -20; % default is -20 for populational fSMR experiments where light source is always on
     analysis_params.med_filt_length = 5; %full PMT data median filter window size, default 50
     analysis_params.moving_average_window_size = 5; %full PMT data moving-average filter window size, default 5    
-    analysis_params.med_filt_window_size = 3*analysis_params.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
+    analysis_params.med_filt_window_size = 3*Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
     analysis_params.min_distance_btw_peaks = 50; % minimum distance between peaks, for identifying unique peaks
     analysis_params.uni_peak_range_ext = 5; % number of data points from each side of detection cutoff to be considered as part of the peak
     analysis_params.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
@@ -172,23 +173,23 @@ else
     disp_progress = 0;
         %loop through to get each PMT local file ID
     for i = 1:n_pmt_channel
-        %fprintf('\nGetting PMT Channel %d readout...', i)
+        fprintf('\nGetting PMT Channel %d readout...', i)
         input_info.pmt_dir(i) = input_dir;
-        %target_pmt_channel = sprintf('*PMT_ch%i*.bin',i);
+        target_pmt_channel = sprintf('*PMT_ch%i*.bin',i);
         S = dir(fullfile(input_info.pmt_dir(i),target_pmt_channel));
         input_info.pmt_filename(i) = S.name;
-        %fprintf('\n%s selected for analysis\n', input_info.pmt_filename(i))
+        fprintf('\n%s selected for analysis\n', input_info.pmt_filename(i))
         pmt_file_ID(i) = fopen(strcat(input_info.pmt_dir(i), input_info.pmt_filename(i)), 'r', 'b'); %open PMT file and create a local file ID for extracting data downstream
 
     end
 
     %grabing time local file ID
-    %fprintf('\nGetting time data...\n')
+    fprintf('\nGetting time data...\n')
     input_info.time_dir = input_dir;
     S = dir(fullfile(input_info.time_dir,sprintf('*PMT_time*.bin')));
     input_info.time_filename = S.name;
     time_file_ID = fopen(strcat(input_info.time_dir, input_info.time_filename), 'r', 'b');
-    %fprintf('\n%s selected for analysis\n', input_info.time_filename)
+    fprintf('\n%s selected for analysis\n', input_info.time_filename)
 
     name_split = strsplit(input_info.time_dir,'\');
     sample_name = name_split{end-1};
@@ -206,8 +207,8 @@ disp_params=[analysis_mode, disp_progress];
 
 %get how many segments to conduct analysis 
 n = 1;
-while(fseek(pmt_file_ID(1), n*8*analysis_params.datasize, 'bof') == 0)
-    % flip forward 8*analysis_params.datasize bytes repeatedly until file ends
+while(fseek(pmt_file_ID(1), n*8*analysis_params_pmt.datasize, 'bof') == 0)
+    % flip forward 8*analysis_params_pmt.datasize bytes repeatedly until file ends
     n = n + 1;
 end
 num_segments = n - 1; % total number of segments = length of file in segments
@@ -229,15 +230,15 @@ while(flag==0)
 
     % seek data for current segement, datatype int is 8bytes
     for channel = 1:n_pmt_channel
-        fseek(pmt_file_ID(channel),segment_loop*8*analysis_params.datasize, 'bof');
+        fseek(pmt_file_ID(channel),segment_loop*8*analysis_params_pmt.datasize, 'bof');
     end
-    fseek(time_file_ID,segment_loop*8*analysis_params.datasize, 'bof');
+    fseek(time_file_ID,segment_loop*8*analysis_params_pmt.datasize, 'bof');
     
     % read raw pmt and time file
     for channel = 1:n_pmt_channel
-        rawdata_pmt{1,channel} = fread(pmt_file_ID(channel),analysis_params.datasize,'float64=>double');
+        rawdata_pmt{1,channel} = fread(pmt_file_ID(channel),analysis_params_pmt.datasize,'float64=>double');
     end
-    rawdata_time_pmt = fread(time_file_ID,analysis_params.datasize,'float64=>double');
+    rawdata_time_pmt = fread(time_file_ID,analysis_params_pmt.datasize,'float64=>double');
   
     [seg_readout_pmt,progress_msg] = P1_peakanalysis_pmt(segment_loop,num_segments,rawdata_pmt, rawdata_time_pmt, disp_params, analysis_params,input_info);
   
@@ -254,7 +255,7 @@ while(flag==0)
     
     segment_loop=segment_loop+1;
     
-    if length(rawdata_pmt{1,1}) < analysis_params.datasize
+    if length(rawdata_pmt{1,1}) < analysis_params_pmt.datasize
         waitbar(1,progress_bar,{'Finishing'});
         pause(0.5)
         flag = 1;
@@ -275,10 +276,8 @@ if fxm_mode == 1
     base_rightslope_pass_ind = find(abs(full_readout_pmt.baseline_right_slope(:,fxm_channel)) < analysis_params.thresh_base_slope);
 
     cell_pass_ind =intersect(base_amp_pass_ind,intersect(base_diff_pass_ind, intersect(base_leftslope_pass_ind,base_rightslope_pass_ind)));
-    pass_rate = 100*length(cell_pass_ind)/height(full_readout_pmt.amplitude);
-    QC_msg = sprintf('%% %0.2f of detected signals passed QC check',pass_rate);
+    QC_msg = sprintf('%% %0.2f of detected signals passed QC check',100*length(cell_pass_ind)/height(full_readout_pmt.amplitude));
 else
-    pass_rate = 100;
     cell_pass_ind = 1:1:height(full_readout_pmt);
     QC_msg = sprintf('QC check are passed');
 end

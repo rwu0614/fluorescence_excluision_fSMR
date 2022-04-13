@@ -53,7 +53,7 @@ idx_rangeofinterest = find(rawdata_pmt{1,1} > Baseline_rough_cutoff);
 if length(idx_rangeofinterest) < med_filt_window_size
     readout_pmt = [];
     progress_msg = [];
-    fprintf('Too short for peak selection...exiting this segment\n')
+    %fprintf('Too short for peak selection...exiting this segment\n')
     elapsed_time = elapsed_time + (rawdata_time_pmt(end) - rawdata_time_pmt(1));
     elapsed_index = elapsed_index + length(rawdata_pmt{1});
     return;
@@ -157,7 +157,7 @@ for i=1:n_pmt_channel
 end
 %exiting the script if no peaks were found
 if sum([Peak.count{:}])==0
-    fprintf('\nNo peak found in this section...exiting this segment\n');
+    %fprintf('\nNo peak found in this section...exiting this segment\n');
     readout_pmt = [];
     progress_msg = [];
     elapsed_time = elapsed_time + (rawdata_time_pmt(end) - rawdata_time_pmt(1));

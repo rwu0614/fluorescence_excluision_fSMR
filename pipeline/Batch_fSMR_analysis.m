@@ -1,0 +1,92 @@
+clear all
+close all
+format long;
+currentFolder = pwd;
+addpath('report_functions\');
+addpath('helper_functions\');
+addpath('plotting_functions\');
+
+%% Define path to instruction sheet
+
+%%%%%%%%%%%%%%%%%%%%%  Input instruction sheet %%%%%%%%%%%%%%%%%%%%%%%%
+
+% Specify path to fSMR_readout_instruction sheet
+fprintf('\nGetting fSMR_readout_instruction sheet...\n')
+[input_info.instruction_filename, input_info.instruction_dir, exist_pmt] = uigetfile('../*.*','Select fSMR_readout_instruction sheet',' ');
+
+instruction_path = [input_info.instruction_dir,'\',input_info.instruction_filename];
+% Accessing paired data through FBM_metadata_assembly_instruction sheet
+opts = detectImportOptions(instruction_path);
+opts = setvartype(opts,'string');
+instruction = readtable(instruction_path,opts);
+
+
+%% PMT analysis parameters
+    analysis_params_pmt.Peak_length = 100; % estimated peak length
+    analysis_params_pmt.datasize = 2e4;   % establish a segment size (~32Mbytes)
+    
+    analysis_params_pmt.Baseline_rough_cutoff = -20; % default is -20 for populational fSMR experiments where light source is always on
+    analysis_params_pmt.med_filt_length = 5; %full PMT data median filter window size, default 50
+    analysis_params_pmt.moving_average_window_size = 5; %full PMT data moving-average filter window size, default 5    
+    analysis_params_pmt.med_filt_window_size = 3*analysis_params_pmt.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
+    analysis_params_pmt.min_distance_btw_peaks = 50; % minimum distance between peaks, for identifying unique peaks
+    analysis_params_pmt.uni_peak_range_ext = 5; % number of data points from each side of detection cutoff to be considered as part of the peak
+    analysis_params_pmt.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
+    
+    analysis_params_pmt.fxm_baseline_choice = 2;
+    
+    % for upstream compensation
+    analysis_params_pmt. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
+    % For signal QC filtering
+    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.1; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params_pmt.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
+    analysis_params_pmt.thresh_base_height_range = 0.05;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Initialize analysis and report parameters
+batch_log = table();
+
+
+for i = 1:length(instruction.path)
+    warning('off','all')
+    % load revelent parameters for each sample
+    % pmt sample-based params
+    analysis_params_pmt.detect_thresh_pmt(1)= str2double(instruction.pmt_1_detection_threshold(i));
+    analysis_params_pmt.detect_thresh_pmt(2)= str2double(instruction.pmt_2_detection_threshold(i));
+    analysis_params_pmt.detect_thresh_pmt(3)= str2double(instruction.pmt_3_detection_threshold(i));
+    analysis_params_pmt.detect_thresh_pmt(4)= str2double(instruction.pmt_4_detection_threshold(i));
+    analysis_params_pmt.detect_thresh_pmt(5)= str2double(instruction.pmt_5_detection_threshold(i));
+    % pairing sample-based params
+    analysis_params_pair.min_time_threshold = str2double(instruction.pairing_window_cutoff_low(i));
+    analysis_params_pair.max_time_threshold = str2double(instruction.pairing_window_cutoff_high(i));
+    analysis_params_pair.chip_id = char(instruction.chip_id(i));
+    analysis_params_pair.hz2pg_factor = str2double(instruction.hz2pg_factor(i));
+    
+    %initiate PMT analysis
+    pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
+%     %initiate SMR analysis
+%     SMR_readout_batch(instruction.path(i));
+    %initiale pairing
+    rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
+    sample_path_names = strsplit(instruction.path(i),"\");
+    batch_log.sample_ID(i) = sample_path_names(end-1);
+    batch_log.pct_PMT_QCpass = pmt_log_temp;
+    batch_log.pct_SMR_paired(i) = rpt_log_temp(1);
+    batch_log.pct_PMT_paired(i) = rpt_log_temp(2);
+    batch_log.pct_dropout(i) = rpt_log_temp(3);
+    clc
+    disp(batch_log)
+    warning('on','all') %% DO NOT delete this line
+end
+
+%% Output pairing report
+% Save files in the same folder as the instruction sheet
+[instruction_rootdir,~,~] = fileparts(instruction_path);
+pairing_result_name = ['pairing_result_',char(input_info.instruction_filename)];
+cd(instruction_rootdir)
+    writetable(cell2table(pairing_result),pairing_result_name,'Delimiter','\t','WriteRowNames',true) %tab delimited
+    disp('pairing_result top rows:')
+    head(cell2table(pairing_result))
+cd(currentFolder)
+

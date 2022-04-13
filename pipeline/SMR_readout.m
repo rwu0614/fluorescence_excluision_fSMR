@@ -166,8 +166,10 @@ while(1)
     % Creat a column vector of the time data in the current block being analyzed 
     rawdata_smr_time_current = rawdata_smr_time([loop*datasize+1:min(length(rawdata_smr), (loop+1)*datasize)]);
     % Detect peaks from current block
-    [datalast, analysis_params] = S1_PeakAnalysis_time(-rawdata_smr_current', rawdata_smr_time_current, datafull, loop, analysisparams, estimated_datapoints_best);
-    analysis_params.estimated_datapoints_optimized = estimated_datapoints_best;
+    [datalast, analysis_params_temp] = S1_PeakAnalysis_time(-rawdata_smr_current', rawdata_smr_time_current, datafull, loop, analysisparams, estimated_datapoints_best);
+    if loop ==1
+        analysis_params = analysis_params_temp;
+    end
     
     
     % Compile all detected indiviaul peaks from each segement through the
@@ -182,6 +184,7 @@ while(1)
         break
     end
 end
+analysis_params.estimated_datapoints_optimized = estimated_datapoints_best;
 %=================================================================%
 %%
 %=======================Merging and filtering=======================%

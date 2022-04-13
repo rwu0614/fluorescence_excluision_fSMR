@@ -227,9 +227,7 @@ dlmwrite(out_file_name, readout_paired, 'delimiter', ',', 'precision', 25);
 cd(currentFolder)
 
 % generate analysis report
-if nargin ~=0
-    input_info.pmt_dir = convertStringsToChars(input_info.pmt_dir);
-end
+if
 report_dir = [input_info.pmt_dir '\' sample_name '_report\Pairing_report\'];
 mkdir(report_dir)
 Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,analysis_params,trace, window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count);
