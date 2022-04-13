@@ -46,9 +46,10 @@ instruction = readtable(instruction_path,opts);
 
 %% Initialize analysis and report parameters
 batch_log = table();
-
+[instruction_rootdir,~,~] = fileparts(instruction_path);
+batch_log_name = ['Batch_process_log',char(input_info.instruction_filename),'.txt'];
 %%
-for i = 28:length(instruction.path)
+for i = 1:length(instruction.path)
     warning('off','all')
     % load revelent parameters for each sample
     % pmt sample-based params
@@ -78,17 +79,14 @@ for i = 28:length(instruction.path)
     batch_log.n_paired_cells(i) = rpt_log_temp(4);
     batch_log.processed_time(i) = datetime;
     clc
+    % save log
     disp(batch_log)
-    warning('on','all') %% DO NOT delete this line
-end
-
-%% Output pairing report
-% Save files in the same folder as the instruction sheet
-[instruction_rootdir,~,~] = fileparts(instruction_path);
-batch_log_name = ['Batch_process_log',char(input_info.instruction_filename),'.txt'];
-cd(instruction_rootdir)
+    cd(instruction_rootdir)
     writetable(batch_log,batch_log_name,'Delimiter','\t','WriteRowNames',true) %tab delimited
     disp('Batch process log top rows:')
     head(batch_log)
-cd(currentFolder)
+    cd(currentFolder)
+        
+    warning('on','all') %% DO NOT delete this line
+end
 
