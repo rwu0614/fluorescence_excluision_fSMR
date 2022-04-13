@@ -43,7 +43,7 @@ if nargin ==0
     analysis_params_file_fullname = strcat(input_info.params_dir, input_info.params_filename); 
     analysis_params = readtable(analysis_params_file_fullname,'ReadRowNames',true,'ReadVariableNames',true,'Delimiter',' ');
 else
-    fprintf('\nGetting SMR data...\n')
+    %fprintf('\nGetting SMR data...\n')
     input_info.smr_dir = input_dir;
     S = dir(fullfile(input_info.smr_dir ,sprintf('*readout_smr*.csv')));
     input_info.smr_filename = S.name;
@@ -57,7 +57,7 @@ else
     sample_name = name_split{end-1};   
     sample_name= strrep(sample_name,'_',' ');   
 
-    fprintf('\nGetting PMT data...\n')
+    %fprintf('\nGetting PMT data...\n')
     input_info.pmt_dir = input_dir;
     S = dir(fullfile(input_info.pmt_dir  ,sprintf('*readout_pmt*.csv')));
     input_info.pmt_filename = S.name;
@@ -65,7 +65,7 @@ else
     pmt_input = readtable(input_info.pmt_filename);
     cd(currentFolder)
     
-    fprintf('\nGetting PMT analysis params data...\n')
+    %fprintf('\nGetting PMT analysis params data...\n')
     input_info.params_dir = input_dir;
     S = dir(fullfile(input_info.params_dir ,sprintf('*readout_pmt_analysis_params*.txt')));
     input_info.params_filename = S.name;
@@ -214,7 +214,7 @@ prt_paired_smr = 100*length(paired_smr_ind)/length(smr_data.smr);
 prt_paired_pmt = 100*length(paired_pmt_ind)/height(pmt_input);
 dropout_rate = 100*multiplet_count/length(pre_filt_paired_pmt_ind);
 
-pairing_stats = [prt_paired_smr,prt_paired_pmt,dropout_rate];
+pairing_stats = [prt_paired_smr,prt_paired_pmt,dropout_rate,length(paired_smr_ind)];
 
 %format follows: [time of detection(computer real time), smr(pg), PacificBlue(mV),FITC(mV), PE(mV), APC(mV), Cy7(mV),PMTtoSMR transit time(ms)]
 readout_paired = [smr_data.time(paired_smr_ind),smr_data.smr(paired_smr_ind),...

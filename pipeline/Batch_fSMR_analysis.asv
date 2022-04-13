@@ -38,15 +38,18 @@ instruction = readtable(instruction_path,opts);
     % for upstream compensation
     analysis_params_pmt. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.1; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.2; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params_pmt.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
     analysis_params_pmt.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %% Initialize analysis and report parameters
-pairing_result = cell(length(instruction.path),5);
-for i = 1:length(instruction.path)
+batch_log = table();
+
+%%
+for i = 9:length(instruction.path)
+    warning('off','all')
     % load revelent parameters for each sample
     % pmt sample-based params
     analysis_params_pmt.detect_thresh_pmt(1)= str2double(instruction.pmt_1_detection_threshold(i));
@@ -61,27 +64,31 @@ for i = 1:length(instruction.path)
     analysis_params_pair.hz2pg_factor = str2double(instruction.hz2pg_factor(i));
     
     %initiate PMT analysis
-%    PMT_readout_combo(instruction.path(i),analysis_params_pmt);
+    pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
 %     %initiate SMR analysis
 %     SMR_readout_batch(instruction.path(i));
     %initiale pairing
     rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
-    sample_ID{i) = 
-%     pairing_result{i,1} = instruction.path(i);
-%     fn = fieldnames(rpt_log_sec3);
-%     for j = 1:numel(fn)
-%         pairing_result{i,j+1} = convertCharsToStrings(rpt_log_sec3.(fn{j}));
-%     end
-    
+    sample_path_names = strsplit(instruction.path(i),"\");
+    batch_log.sample_ID(i) = sample_path_names(end-1);
+    batch_log.pct_PMT_QCpass(i) = pmt_log_temp;
+    batch_log.pct_SMR_paired(i) = rpt_log_temp(1);
+    batch_log.pct_PMT_paired(i) = rpt_log_temp(2);
+    batch_log.pct_dropout(i) = rpt_log_temp(3);
+    batch_log.n_paired_cells(i) = rpt_log_temp(4);
+    batch_log.processed_time(i) = datetime;
+    clc
+    disp(batch_log)
+    warning('on','all') %% DO NOT delete this line
 end
 
 %% Output pairing report
 % Save files in the same folder as the instruction sheet
 [instruction_rootdir,~,~] = fileparts(instruction_path);
-pairing_result_name = ['pairing_result_',char(input_info.instruction_filename)];
+batch_log_name = ['Batch_process_log',char(input_info.instruction_filename)];
 cd(instruction_rootdir)
-    writetable(cell2table(pairing_result),pairing_result_name,'Delimiter','\t','WriteRowNames',true) %tab delimited
-    disp('pairing_result top rows:')
-    head(cell2table(pairing_result))
+    writetable(batch_log,batch_log_name,'Delimiter','\t','WriteRowNames',true) %tab delimited
+    disp('Batch process log top rows:')
+    head(batch_log)
 cd(currentFolder)
 

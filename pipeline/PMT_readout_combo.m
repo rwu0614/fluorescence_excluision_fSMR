@@ -174,7 +174,7 @@ else
     for i = 1:n_pmt_channel
         %fprintf('\nGetting PMT Channel %d readout...', i)
         input_info.pmt_dir(i) = input_dir;
-        %target_pmt_channel = sprintf('*PMT_ch%i*.bin',i);
+        target_pmt_channel = sprintf('*PMT_ch%i*.bin',i);
         S = dir(fullfile(input_info.pmt_dir(i),target_pmt_channel));
         input_info.pmt_filename(i) = S.name;
         %fprintf('\n%s selected for analysis\n', input_info.pmt_filename(i))

@@ -38,7 +38,7 @@ instruction = readtable(instruction_path,opts);
     % for upstream compensation
     analysis_params_pmt. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.1; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.2; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params_pmt.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
     analysis_params_pmt.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,8 +47,8 @@ instruction = readtable(instruction_path,opts);
 %% Initialize analysis and report parameters
 batch_log = table();
 
-
-for i = 1:length(instruction.path)
+%%
+for i = 28:length(instruction.path)
     warning('off','all')
     % load revelent parameters for each sample
     % pmt sample-based params
@@ -71,10 +71,12 @@ for i = 1:length(instruction.path)
     rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
     sample_path_names = strsplit(instruction.path(i),"\");
     batch_log.sample_ID(i) = sample_path_names(end-1);
-    batch_log.pct_PMT_QCpass = pmt_log_temp;
+    batch_log.pct_PMT_QCpass(i) = pmt_log_temp;
     batch_log.pct_SMR_paired(i) = rpt_log_temp(1);
     batch_log.pct_PMT_paired(i) = rpt_log_temp(2);
     batch_log.pct_dropout(i) = rpt_log_temp(3);
+    batch_log.n_paired_cells(i) = rpt_log_temp(4);
+    batch_log.processed_time(i) = datetime;
     clc
     disp(batch_log)
     warning('on','all') %% DO NOT delete this line
@@ -83,10 +85,10 @@ end
 %% Output pairing report
 % Save files in the same folder as the instruction sheet
 [instruction_rootdir,~,~] = fileparts(instruction_path);
-pairing_result_name = ['pairing_result_',char(input_info.instruction_filename)];
+batch_log_name = ['Batch_process_log',char(input_info.instruction_filename),'.txt'];
 cd(instruction_rootdir)
-    writetable(cell2table(pairing_result),pairing_result_name,'Delimiter','\t','WriteRowNames',true) %tab delimited
-    disp('pairing_result top rows:')
-    head(cell2table(pairing_result))
+    writetable(batch_log,batch_log_name,'Delimiter','\t','WriteRowNames',true) %tab delimited
+    disp('Batch process log top rows:')
+    head(batch_log)
 cd(currentFolder)
 
