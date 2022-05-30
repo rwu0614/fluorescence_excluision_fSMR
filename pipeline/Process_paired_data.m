@@ -18,7 +18,7 @@ APC=ReadoutPaired_matrix(:,6); %APC
 ND=ReadoutPaired_matrix(:,9); %ND
 
 %% Read columns
-PMT_to_fL_conversion_factor=10.6148;
+PMT_to_fL_conversion_factor=9.4371;
 ReadoutPaired_matrix(:,10)= ReadoutPaired_matrix(:, 4)*PMT_to_fL_conversion_factor;% volume
 ReadoutPaired_matrix(:,11)= 1.005 + ReadoutPaired_matrix(:,2)./ReadoutPaired_matrix(:,10); % density
 Volume=ReadoutPaired_matrix(:,10); % cell volume
@@ -27,8 +27,8 @@ Density=ReadoutPaired_matrix(:,11); % cell density
 %% Plotting density vs volume
 figure(1)
 scatter(Volume, Density,12, BM,'fill')
-xlim([0, 1000])
-ylim([1.01, 1.07])
+xlim([0, 3000])
+ylim([1.01, 1.1])
 set(gca,'FontSize',12)
 xlabel('Cell volume (fL)','FontSize',18) 
 ylabel('Cell density (pg/mL)','FontSize',18)

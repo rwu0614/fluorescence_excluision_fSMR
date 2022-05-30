@@ -212,7 +212,7 @@ disp(cell_1_cv*100)
 %%
 %2.4485634
 %8.8485634
-median_vol_real = 1100; %fL for L1210
+median_vol_real = 1000; %800; %fL for L1210
 median_vol_au = median(pmt_input{:,3}(paired_pmt_ind));
 PMT_to_fL_conversion_factor = median_vol_real/median_vol_au; %um3
 real_vol = pmt_input{:,3}(paired_pmt_ind)*PMT_to_fL_conversion_factor;

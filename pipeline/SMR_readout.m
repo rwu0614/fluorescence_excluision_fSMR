@@ -7,7 +7,7 @@
 % SMR raw data without matched time file.
 % 
 % Output file will be saved in the same directory as the raw smr frequency
-% file. In the output matrix, each row contains features of the same 
+% file. In the output matrix, each row contains features of the same
 % detected peak, while each column contains a defined feature.
 % Column features are as following:
 %     1st column = time stamp from labview recorded computer real-time
