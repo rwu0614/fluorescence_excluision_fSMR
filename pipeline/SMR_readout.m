@@ -1,3 +1,4 @@
+ function SMR_readout(varargin)
 % SMR_readout
 % This file is for processing raw SMR .bin files and outputs a csv file that
 % contains peak heights of every detected smr signal as well as the time stamp
@@ -14,8 +15,13 @@
 %     2nd column = peak height in Hz of the first peak from the smr signal
 
 %%
-clear all
-close all
+if nargin ==0
+    clear 
+    clc
+    close all
+else
+    input_dir = varargin{1};
+end
 format long;
 currentFolder = pwd;
 addpath('report_functions\');
@@ -37,33 +43,53 @@ sampletime=[];
 %% Initialization
 
 %=========================== Read data============================%
-% user input for smr frequency file location
-fprintf('\nGetting SMR data...\n')
-[input_info.smr_filename, input_info.smr_dir, exist_smr] = uigetfile('../*.*','Select SMR File',' ');
-if(exist_smr ~= 0)
-    smr_file_ID = fopen(strcat(input_info.smr_dir, input_info.smr_filename), 'r');
-    fprintf('\n%s selected for analysis\n', input_info.smr_filename)
-else
-    fprintf('Quitting analysis program now...')
-    return
-end
+if nargin==0
+    % user input for smr frequency file location
+    fprintf('\nGetting SMR data...\n')
+    [input_info.smr_filename, input_info.smr_dir, exist_smr] = uigetfile('../*.*','Select SMR File',' ');
+    if(exist_smr ~= 0)
+        smr_file_ID = fopen(strcat(input_info.smr_dir, input_info.smr_filename), 'r');
+        fprintf('\n%s selected for analysis\n', input_info.smr_filename)
+    else
+        fprintf('Quitting analysis program now...')
+        return
+    end
 
-%grab sample name from input file name
-name_split = strsplit(input_info.smr_dir,'\');
-sample_name = name_split{end-1};
-sample_name= strrep(sample_name,'_',' '); % this variable is for annotating output filename
-
-% user input for smr time file location
-fprintf('\nGetting time data...\n')
-[input_info.smr_time_filename, input_info.smr_time_dir, exist_time] = uigetfile('../*.*','Select time File',' ');
-if(exist_time ~= 0)
-    smr_time_file_ID = fopen(strcat(input_info.smr_time_dir, input_info.smr_time_filename), 'r', 'b');
-    fprintf('\n%s selected for analysis\n', input_info.smr_time_filename)
-else
-    fprintf('\nContinuing analysis without time data...\n')
-end
+    % user input for smr time file location
+    fprintf('\nGetting time data...\n')
+    [input_info.smr_time_filename, input_info.smr_time_dir, exist_time] = uigetfile('../*.*','Select time File',' ');
+    if(exist_time ~= 0)
+        smr_time_file_ID = fopen(strcat(input_info.smr_time_dir, input_info.smr_time_filename), 'r', 'b');
+        fprintf('\n%s selected for analysis\n', input_info.smr_time_filename)
+    else
+        fprintf('\nContinuing analysis without time data...\n')
+    end
+    %grab sample name from input file name
+    name_split = strsplit(input_info.smr_dir,'\');
+    sample_name = name_split{end-1};
+    sample_name= strrep(sample_name,'_',' '); % this variable is for annotating output filename
 %=================================================================%
+else
+    %fprintf('\nGetting SMR data...\n')
+    input_info.smr_dir = input_dir;
+    smr_sample_path = strsplit(input_info.smr_dir,'\');
+    smr_sample_name = smr_sample_path(end-1);
+    S = dir(fullfile(input_info.smr_dir ,smr_sample_name));
+    input_info.smr_filename = S.name;
+    smr_file_ID = fopen(strcat(input_info.smr_dir, input_info.smr_filename), 'r');
+    %fprintf('\n%s selected for analysis\n', smr_filename)
 
+    %fprintf('\nGetting Time data...\n')
+    input_info.smr_time_dir = input_dir;
+    S = dir(fullfile(input_info.smr_time_dir ,sprintf('*SMR_time*')));
+    input_info.smr_time_filename = S.name;
+    smr_time_file_ID  = fopen(strcat(input_info.smr_time_dir, input_info.smr_time_filename), 'r', 'b');
+    %fprintf('\n%s selected for analysis\n', smr_time_filename)
+    %grab sample name from input file name
+    name_split = strsplit(input_info.smr_dir,'\');
+    sample_name = name_split{end-1};
+    sample_name= strrep(sample_name,'_',' '); % this variable is for annotating output filename
+end
 
 %%=======================Raw data pre-processing=======================%
 %%This part converts the raw smr binary file into 1D time-series 
@@ -104,13 +130,17 @@ num_blocks = ceil(length(rawdata_smr)/datasize);
 %%display individual detected peak shapes as well as all detected peaks from
 %%the whole data block under analysis(data block size defined by "datasize" variable)
 
-analysismode = input('Rapid analysis mode? (1 = Yes, 0 = No):    ');
-if analysismode == 1
-    dispprogress = input('Display progress? (1 = Yes, 0 = No):       ');
+if nargin ==0
+    analysismode = input('Rapid analysis mode? (1 = Yes, 0 = No):    ');
+    if analysismode == 1
+        dispprogress = input('Display progress? (1 = Yes, 0 = No):       ');
+    else
+        dispprogress = 1;
+    end
 else
-    dispprogress = 1;
+    analysismode = 1;
+    dispprogress = 0;
 end
-
 % This is for passing parameters to downstream functions
 analysisparams.analysismode = analysismode;       
 analysisparams.dispprogress = dispprogress;
@@ -157,9 +187,6 @@ estimated_datapoints_best = estimated_datapoints(optimized_idx);
 % estimated_datapoints_best = 150;
 
 while(1)
-%     if loop ==2
-%         loop = loop+2;
-%     end
     
     % Creat a column vector of the frequency data in the current block being analyzed  
     rawdata_smr_current = rawdata_smr([loop*datasize+1:min(length(rawdata_smr), (loop+1)*datasize)]);
@@ -167,8 +194,10 @@ while(1)
     rawdata_smr_time_current = rawdata_smr_time([loop*datasize+1:min(length(rawdata_smr), (loop+1)*datasize)]);
     % Detect peaks from current block
     [datalast, analysis_params_temp] = S1_PeakAnalysis_time(-rawdata_smr_current', rawdata_smr_time_current, datafull, loop, analysisparams, estimated_datapoints_best);
-    if loop ==1
+    write_param = 1;
+    if height(datalast)>2&&write_param == 1
         analysis_params = analysis_params_temp;
+        write_param=0;
     end
     
     
@@ -211,8 +240,11 @@ dlmwrite(out_file_name, output_smr, 'delimiter', ',', 'precision', 25);
 cd(currentFolder)
 
 %% Generate report file
-
+if nargin ~=0
+    input_info.smr_dir = convertStringsToChars(input_info.smr_dir);
+end
 report_dir = [input_info.smr_dir '\' sample_name '_report\SMR_report\'];
+
 mkdir(report_dir)
 SMR_readout_report_v1(report_dir,input_info,sample_name, datasmr_good, output_smr, number_bad_peaks, analysis_params)
 
@@ -276,11 +308,11 @@ ylabel('Counts')
 %% Hz to pg calibration
 beads_radi = 4*10^-4; % 4um to cm
 beads_dens = 1.049; % beads density
-fluid_dens = 1.003; % PBS density
+fluid_dens = 1.00476976; % PBS density
 BM_beads = (10^12)*(beads_dens-fluid_dens)*((4/3)*pi*(beads_radi^3)); % in pg
-scaling_factor = BM_beads/median(mass_transit_fil_datafull(2,:));
+scaling_factor = BM_beads/median(mass_transit_fil_datafull(2,:))
 
 % chip from 04/12/21 scaling factor is 0.60779
  
-disp(estimated_datapoints_best)
- 
+%disp(estimated_datapoints_best)
+ end 

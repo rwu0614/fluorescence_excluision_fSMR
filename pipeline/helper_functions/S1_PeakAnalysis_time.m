@@ -55,7 +55,7 @@ analysis_params.estimated_noise = 5; %Hz
 
 sgolay_length_idx = 1; %this will make default length of 5 for 50 idx transits
 sgolay_length = 2*round(sgolay_length_idx*(estimated_datapoints/50))+1;
-fprintf('sgolay length for datapoints per transit of %4.0f will be %2.0f', estimated_datapoints, sgolay_length); disp(' ');
+%fprintf('sgolay length for datapoints per transit of %4.0f will be %2.0f', estimated_datapoints, sgolay_length); disp(' ');
 if elapsed_time==0
     xtest = x([1:min([1e5, length(x)])]) - x(1);
 figure(2); plot(xtest); hold on;
@@ -96,7 +96,12 @@ analysis_params.med_filt_wd = 200;           % window of median filter, which re
 analysis_params.bs_dev_thres = 0.5;         % baseline dev_threshold; threshold used to remove the flat part in the anti-node
 analysis_params.unqPeakDist =150;            % distance over which is a unique 2nd mode peaks,default 200
 analysis_params.offset_input = 5;             % baseline offset to select for peaks
-
+%%%%%%%% USER ADJUSTABLE (Below is assuming 400 data points per transit) %%%%%%%%
+analysis_params.edgethres = 0.12;               % choose the first point left/right of the secondary peaks 40% percent of the average baseline freqvalue
+analysis_params.stdevmultiplier = 3;         % allow 102% of the minimum standard deviation
+analysis_params.diffmultiplier = 0.9;           % allow 90% of the deviation from mean frequency closest to 2ndary peaks
+analysis_params.winsize = 150;                  % number of points searching for baseline collection
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% added 03222019 - compensate for number of data points & noise leve;
 analysis_params.diff_threshold = analysis_params.diff_threshold*((analysis_params.estimated_noise/0.1)^(1/2))/(estimated_datapoints/400);
 analysis_params.med_filt_wd = round(analysis_params.med_filt_wd * estimated_datapoints/400);
@@ -104,11 +109,11 @@ analysis_params.bs_dev_thres = analysis_params.bs_dev_thres*((analysis_params.es
 analysis_params.unqPeakDist = round(analysis_params.unqPeakDist*estimated_datapoints/400);
 
 
-size(ydata)
+size(ydata);
 
 idx = find(abs(diff(ydata))<analysis_params.diff_threshold); %remove fast varying points to get baseline. i.e., remove cell frequency                                                  
 
-size(idx)
+size(idx);
 
 
 % ignore the flat points found over the anti-node
@@ -121,7 +126,7 @@ idx=idx(idx_f);
 
 ydata_thres=interp1(xdata(idx), ydata(idx), xdata);
 
-size(ydata_thres)
+size(ydata_thres);
 
 ydata_thres=ydata_thres-analysis_params.offset_input;
 
@@ -199,15 +204,6 @@ for i=1:length(peak_idx)
         local_xdata = xdata(segmentbound(i):segmentbound(i + 1)) - xdata(segmentbound(i)) + 1;
         local_ydata = ydata(segmentbound(i):segmentbound(i + 1));
     
-    
-        
-    
-    %%%%%%%% USER ADJUSTABLE (Below is assuming 400 data points per transit) %%%%%%%%
-    analysis_params.edgethres = 0.12;               % choose the first point left/right of the secondary peaks 40% percent of the average baseline freqvalue
-    analysis_params.stdevmultiplier = 3;         % allow 102% of the minimum standard deviation
-    analysis_params.diffmultiplier = 0.9;           % allow 90% of the deviation from mean frequency closest to 2ndary peaks
-    analysis_params.winsize = 150;                  % number of points searching for baseline collection
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     baseparams = [analysis_params.stdevmultiplier analysis_params.diffmultiplier analysis_params.edgethres analysis_params.winsize analysis_params.diff_threshold analysis_params.med_filt_wd analysis_params.bs_dev_thres];
     
@@ -271,12 +267,12 @@ for i=1:length(peak_idx)
         % 0 is to distinguish different peaks
 
         format shortg
-        fprintf('------- Section %1.0f ------ \n', sectionnumber);
-        fprintf('-- Data for Segment %1.0f -- \n', i);
-        fprintf('Baseline slope: %1.5f \n', local_baselineslope);
-        fprintf('2nd mode %%diff: %1.5f \n', local_htdiff_poly);
-        fprintf('-------------------------- \n')
-        disp(' ')
+%         fprintf('------- Section %1.0f ------ \n', sectionnumber);
+%         fprintf('-- Data for Segment %1.0f -- \n', i);
+%         fprintf('Baseline slope: %1.5f \n', local_baselineslope);
+%         fprintf('2nd mode %%diff: %1.5f \n', local_htdiff_poly);
+%         fprintf('-------------------------- \n')
+%         disp(' ')
 
         pkidx_poly = [pkidx_poly local_pkidx_poly + segmentbound(i) + left_base(1)];
         apkidx_poly = [apkidx_poly local_apkidx_poly + segmentbound(i) + left_base(1)];

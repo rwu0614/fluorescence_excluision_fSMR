@@ -60,17 +60,17 @@ if nargin==0
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -3; 
-    analysis_params.detect_thresh_pmt(3) = 10;
+    analysis_params.detect_thresh_pmt(2) = 2.5; 
+    analysis_params.detect_thresh_pmt(3) = 2.5;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.1; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.05;
+    analysis_params.thresh_base_height_range = 0.1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     input_dir = varargin{1};
@@ -265,7 +265,7 @@ end
 %% Quality check to remove low-quality signals
 if fxm_mode == 1
     non_nan_ind = find(~isnan(full_readout_pmt.baseline(:,fxm_channel)));
-    base_med = median(full_readout_pmt.baseline(non_nan_ind(1:round(length(non_nan_ind)*1)),fxm_channel));
+    base_med = median(full_readout_pmt.baseline(non_nan_ind(1:round(length(non_nan_ind)*0.3)),fxm_channel));
     all_base_med_norm = abs(full_readout_pmt.baseline(:,fxm_channel)-base_med);
     base_amp_pass_ind = find(all_base_med_norm < base_med*analysis_params.thresh_base_height_range);
     all_cell_baselineDiff_over_sig = abs(full_readout_pmt.baseline_left_height(:,fxm_channel)-full_readout_pmt.baseline_right_height(:,fxm_channel))...
@@ -360,7 +360,18 @@ cd(currentFolder)
 if nargin ~=0
     delete(progress_bar)
 end
+%%
+figure(1)
+scatter(full_readout_pmt.time_of_detection(:),full_readout_pmt.baseline(:,fxm_channel)...
+    ,5,'filled',"MarkerFaceAlpha",0.5)
+hold on
+scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.baseline(cell_pass_ind,fxm_channel)...
+    ,5,'filled',"MarkerFaceAlpha",0.5)
 
+%%
+figure(2)
+scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal(cell_pass_ind,fxm_channel)...
+    ,5,'filled',"MarkerFaceAlpha",0.5)
 %%
 % scatter(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),abs(full_readout_pmt.amplitude(cell_pass_ind,4)-full_readout_pmt.baseline(cell_pass_ind,4))*1000)
 % hold on
@@ -378,19 +389,6 @@ end
 % 
 % scatter(full_readout_pmt.signal(cell_pass_ind,fxm_channel),full_readout_pmt.signal(cell_pass_ind,4))
 
-
-
-
-
-%%
-figure(2)
-scatter(full_readout_pmt.time_of_detection(:),full_readout_pmt.baseline(:,fxm_channel)...
-    ,5,'filled',"MarkerFaceAlpha",0.5)
-
-%%
-figure(3)
-scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal(cell_pass_ind,fxm_channel)...
-    ,5,'filled',"MarkerFaceAlpha",0.5)
 
 end
 

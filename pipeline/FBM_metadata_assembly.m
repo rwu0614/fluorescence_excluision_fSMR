@@ -23,7 +23,7 @@ paired_data_var_names = {'realtime','buoyant_mass','pmt1','pmt2','pmt3','pmt4','
 %paired_data_var_names = {'realtime','buoyant_mass','pmt1','pmt2','pmt3'}; % for older readout_pairing version
 
 % Specify base FBM and metadata table format
-FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3','pmt4','pmt5','P2S_transit_time'};
+FBM_var_to_include = {'realtime','buoyant_mass','pmt1','pmt2','pmt3','pmt4','pmt5','P2S_transit_time'};
 %FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3'}; % for older readout_pairing version
 instruct_var_to_exclude = {'path','filename'}; % metadata sheet will include all variables from the instruction sheet except variables specified here
 

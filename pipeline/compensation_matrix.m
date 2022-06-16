@@ -124,7 +124,7 @@ col_names = {'PacificBlue','FITC','PE','APC','Cy7'};
 row_names = col_names;
 output_mat = array2table(compen_mat,'VariableNames',col_names,'RowName',row_names);
 parts = strsplit(input_info.single_color_ctrl_filedir{input_channel}, '\');
-parent_dir = string(join(parts(1:end-2),"\"));
+parent_dir = string(join(parts(1:end-2),"\\"));
 input_info.experiment_dir = parent_dir;
 
 cd(parent_dir)

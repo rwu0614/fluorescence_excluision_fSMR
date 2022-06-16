@@ -38,9 +38,9 @@ instruction = readtable(instruction_path,opts);
     % for upstream compensation
     analysis_params_pmt. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.2; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params_pmt.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params_pmt.thresh_base_height_range = 0.05;
+    analysis_params_pmt.thresh_base_height_range = 0.2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -64,10 +64,12 @@ for i = 1:length(instruction.path)
     analysis_params_pair.chip_id = char(instruction.chip_id(i));
     analysis_params_pair.hz2pg_factor = str2double(instruction.hz2pg_factor(i));
     
+    %initiate SMR analysis
+     SMR_readout(instruction.path(i));
+    
     %initiate PMT analysis
     pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
-%     %initiate SMR analysis
-%     SMR_readout_batch(instruction.path(i));
+    
     %initiale pairing
     rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
     sample_path_names = strsplit(instruction.path(i),"\");

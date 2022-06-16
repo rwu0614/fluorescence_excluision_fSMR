@@ -75,7 +75,7 @@ rawdata_pmt= fread(pmt_file_ID(1),200000,'float64=>double');
 fseek(time_file_ID,200000 ,'bof');
 rawdata_time_pmt = fread(time_file_ID,200000,'float64=>double');
 
-
+%%
 rawdata_smr = fread(smr_file_ID, 'int32','b')/2^32;
 rawdata_smr(1:129:end)=[];        
 rawdata_smr = rawdata_smr';
@@ -136,46 +136,46 @@ xlim([-signal_offset_smr/10-1,signal_frame_smr/10])
 xlabel('Time from entrance to SMR cantilever (ms)')
 set(gca,'FontSize',15)
 title("Example SMR-PMT signal of a RPE cell")
-% %% Noise characterization
-% segment_size = 100000;
-% rawdata_pmt = rawdata_pmt(end-segment_size:end);
-% baseline = median(rawdata_pmt);
-% x_norm = rawdata_pmt - median(rawdata_pmt);
-% noise_level = rms(x_norm);
-% disp(baseline)
-% disp(noise_level)
-% % disp(noise_level/baseline)
-% %% filtering
-% figure(1)
-% med_filt_length = 300;
-% x_medfilt = medfilt1(x_norm,med_filt_length);
-% 
-% %Ploting
-% plot(rawdata_pmt)
-% hold on
-% plot(x_medfilt)
-% 
-% %% FFT on noise signal
-% figure(2)
-% Fs = 10000;            % Sampling frequency                    
-% T = 1/Fs;             % Sampling period       
-% L = length(rawdata_pmt);             % Length of signal
-% t = (0:L-1)*T;        % Time vector
-% 
-% Y = fft(x_norm);
-% 
-% P2 = abs(Y/L);
-% P1 = P2(1:L/2+1);
-% P1(2:end-1) = 2*P1(2:end-1);
-% f = Fs*(0:(L/2))/L;
-% plot(f,P1) 
-% title('Single-Sided Amplitude Spectrum of X(t)')
-% xlabel('f (Hz)')
-% ylabel('|P1(f)|')
-% 
-% 
-% 
-% 
+%% Noise characterization
+segment_size = 100000;
+rawdata_pmt = rawdata_pmt(end-segment_size:end);
+baseline = median(rawdata_pmt);
+x_norm = rawdata_pmt - median(rawdata_pmt);
+noise_level = rms(x_norm);
+disp(baseline)
+disp(noise_level)
+% disp(noise_level/baseline)
+%% filtering
+figure(1)
+med_filt_length = 300;
+x_medfilt = medfilt1(x_norm,med_filt_length);
+
+%Ploting
+plot(rawdata_pmt)
+hold on
+plot(x_norm)
+
+%% FFT on noise signal
+figure(2)
+Fs = 10000;            % Sampling frequency                    
+T = 1/Fs;             % Sampling period       
+L = length(rawdata_pmt);             % Length of signal
+t = (0:L-1)*T;        % Time vector
+
+Y = fft(x_norm);
+
+P2 = abs(Y/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+f = Fs*(0:(L/2))/L;
+plot(f,P1) 
+title('Single-Sided Amplitude Spectrum of X(t)')
+xlabel('f (Hz)')
+ylabel('|P1(f)|')
+
+
+
+
 
 
 

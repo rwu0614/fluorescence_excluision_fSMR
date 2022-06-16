@@ -75,17 +75,17 @@ while(repeatflag == 1)
         
         goflag = 0;
         if mod(length(peaks),3) ~= 0 
-            disp('Warning: the number of peaks found is not a multiple of three. Check plot.')
+            %disp('Warning: the number of peaks found is not a multiple of three. Check plot.')
 %             peaks=[];
             checkthres = 0;%input('Enter 1 if you want to adjust threshold, enter 0 to skip:   ');
             if length(peaks)==1
-                disp('Skipping this peak set. There is only one peak..');
+                %disp('Skipping this peak set. There is only one peak..');
                 peaks=[];
                 repeatflag=0;
             end
             
             if checkthres == 1
-                fprintf('Previous threshold multiplier:   %3.0f \n', minpkht_thres);
+               % fprintf('Previous threshold multiplier:   %3.0f \n', minpkht_thres);
                 minpkht_thres = input('Input new threshold:   ');
             else  %%%%% add elseif statement to try anyways
 %                 peaks = [];

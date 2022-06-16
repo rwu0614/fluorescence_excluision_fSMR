@@ -28,8 +28,8 @@ while exitflag == 0
     leftedgesearch = max(1,(peaks(1) - winsize)):1:max(1,peaks(1)-round(peakdist/6));
     rightedgesearch =min(length(ydata), peaks(end)+round(peakdist/6)):1:min((peaks(end) + winsize) , length(ydata));
     
-    if (isempty(find((diff(ydata(leftedgesearch))) < -edgethres)) || isempty(find((diff(ydata(rightedgesearch))) > edgethres)))
-        disp('Skipping this peakset... no proper edge found')
+    if (isempty((diff(ydata(leftedgesearch))) < -edgethres) || isempty((diff(ydata(rightedgesearch))) > edgethres))
+        %disp('Skipping this peakset... no proper edge found')
         left_base = [];
         right_base = [];
         edgeidx = []; exitflag=1;
@@ -74,7 +74,7 @@ while exitflag == 0
     end
     
     if(isempty(left_base) || isempty(right_base))
-        disp('Skipping this peakset...')
+        %disp('Skipping this peakset...')
         left_base = [];
         right_base = [];
         edgeidx = [];
