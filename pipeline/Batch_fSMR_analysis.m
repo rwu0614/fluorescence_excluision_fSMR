@@ -40,7 +40,7 @@ instruction = readtable(instruction_path,opts);
     % For signal QC filtering
     analysis_params_pmt.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params_pmt.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params_pmt.thresh_base_height_range = 0.2;
+    analysis_params_pmt.thresh_base_height_range = 0.1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

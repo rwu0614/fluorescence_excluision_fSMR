@@ -1,4 +1,4 @@
-function rpt_log_sec3 = Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,pmt_data,analysis_params,trace,window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count)
+function rpt_log_sec3 = Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,smr_input,pmt_input,analysis_params,trace,window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count)
 
 % Readout_pairing_report.m creates a pdf report of the pairing results
 % between smr_readout and pmt_readou. The goal for the report is to
@@ -99,12 +99,12 @@ end
 
 % Section 3 Pairing results
 rpt_log_sec3 =[];
-rpt_log_sec3.Paired_events = sprintf('There are %1.0f paired events\n',length(readout_paired(:,1)));
+rpt_log_sec3.Paired_events = sprintf('There are %1.0f paired events\n',height(readout_paired));
 rpt_log_sec3.Percent_SMR_paired = sprintf('SMR:  %%%1.2f paired. [%1.0f out of %1.0f signals]\n', ...
-    100*length(readout_paired(:,1))/length(smr_data.smr),length(readout_paired(:,1)),length(smr_data.smr));
+    100*height(readout_paired)/height(smr_input),height(readout_paired),height(smr_input));
 rpt_log_sec3.Percent_PMT_paired = sprintf('PMT:  %%%1.2f paired. [%1.0f out of %1.0f signals]\n', ...
-    100*length(readout_paired(:,1))/length(pmt_data.time),length(readout_paired(:,1)),length(pmt_data.time));
-rpt_log_sec3.Dropout_rate = sprintf('Dropout rate (due to non-unique pairing): %%%1.2f \n', 100*multiplet_count/(length(readout_paired(:,1))+multiplet_count));
+    100*height(readout_paired)/height(pmt_input),height(readout_paired),height(pmt_input));
+rpt_log_sec3.Dropout_rate = sprintf('Dropout rate (due to non-unique pairing): %%%1.2f \n', 100*multiplet_count/(height(readout_paired)+multiplet_count));
 fn = fieldnames(rpt_log_sec3);
 
 rpt_title = clone(sectrpt_title());
@@ -127,7 +127,7 @@ voltage_plot_lim_higher = 1e+4;
 
 smr_high_exclude_pct = 99.5;
 smr_plot_lim_lower = 0;
-smr_plot_lim_higher = prctile(smr_data.smr,smr_high_exclude_pct);
+smr_plot_lim_higher = prctile(smr_input.buoyant_mass_pg,smr_high_exclude_pct);
 
 rpt_log_sec4 =[];
 rpt_log_sec4.Fluorescence_plotting_lower_cutoff = sprintf('Lower fluorescence plotting limit: %1.5f mV\n',voltage_plot_lim_lower);
@@ -169,9 +169,9 @@ append(ch2,p);
 
 dot_size = 8;
 figure('OuterPosition',[0 0.5*scrsize(4) 0.95*scrsize(3) 0.3*scrsize(4)]);
-    scatter((10^-3/60)*(smr_data.time-smr_data.time(1)),ones(size(smr_data.time)),dot_size,'filled','r')
+    scatter((10^-3/60)*(smr_input.real_time_sec-smr_input.real_time_sec(1)),ones(size(smr_input.real_time_sec)),dot_size,'filled','r')
     hold on
-    scatter((10^-3/60)*(pmt_data.time-smr_data.time(1)),-1*ones(size(pmt_data.time)),dot_size,'filled','b')
+    scatter((10^-3/60)*(pmt_input.real_time_sec-smr_input.real_time_sec(1)),-1*ones(size(pmt_input.real_time_sec)),dot_size,'filled','b')
     ylim([-2,2])
     title('Real time SMR vs PMT stamps')
     legend(['SMR signal';'PMT signal'],'Location','eastout')
@@ -254,8 +254,17 @@ ha = tight_subplot(2,n_pmt_channel,[.15 .05],[.1 .05]);
 
 for i = 1:length(x_axis_pmt_channel)
     axes(ha(i));
-        x_raw = readout_paired(:,x_axis_pmt_channel(i)+2); % +2 to account for time and smr data column
-        y_raw = readout_paired(:,y_axis_pmt_channel(i)+2); 
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==x_axis_pmt_channel(i)
+            x_raw = readout_paired.vol_au; 
+        else
+            x_raw = readout_paired.(['pmt',num2str(x_axis_pmt_channel(i)),'_mV']); 
+        end
+        
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==y_axis_pmt_channel(i)
+            y_raw = readout_paired.vol_au;
+        else
+            y_raw = readout_paired.(['pmt',num2str(y_axis_pmt_channel(i)),'_mV']); 
+        end
         x_filter_ind = find(x_raw<voltage_plot_lim_higher & x_raw>voltage_plot_lim_lower);
         y_filter_ind = find(y_raw<voltage_plot_lim_higher & y_raw>voltage_plot_lim_lower);
         [filter_ind,~] = intersect(x_filter_ind,y_filter_ind);
@@ -264,8 +273,16 @@ for i = 1:length(x_axis_pmt_channel)
         scatter(x_filtered,y_filtered, 3,'filled')
         symlog()
         title(append(rpt_title_color_lab(x_axis_pmt_channel(i)), ' vs ' ,rpt_title_color_lab(y_axis_pmt_channel(i))))
-        xlabel(append(rpt_title_color_lab(x_axis_pmt_channel(i)), ' (mV)'))
-        ylabel(append(rpt_title_color_lab(y_axis_pmt_channel(i)), ' (mV)'))
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==y_axis_pmt_channel(i)
+            xlabel('fxm volume (au)')
+        else
+            xlabel(append(rpt_title_color_lab(x_axis_pmt_channel(i)), ' (mV)'))
+        end
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==y_axis_pmt_channel(i)
+            ylabel('fxm volume (au)')
+        else
+            ylabel(append(rpt_title_color_lab(y_axis_pmt_channel(i)), ' (mV)'))
+        end
         set(gca,'FontSize',12)
         legend(['n' '=' int2str(length(y_filtered))],'location',"northeast",'FontSize',9)
 end
@@ -293,8 +310,12 @@ ha = tight_subplot(2,n_pmt_channel,[.15 .05],[.1 .05]);
 for i = 1:n_pmt_channel
     axes(ha(i));
 %     subplot(2,n_pmt_channel,i);
-        x_raw = readout_paired(:,2); 
-        y_raw = readout_paired(:,i+2); % +2 to account for time and smr data column
+        x_raw = readout_paired.buoyant_mass_pg; 
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            y_raw = readout_paired.vol_au;
+        else
+            y_raw = readout_paired.(['pmt',num2str(i),'_mV']); 
+        end
         x_filter_ind = find(x_raw<smr_plot_lim_higher & x_raw>smr_plot_lim_lower);
         y_filter_ind = find(y_raw<voltage_plot_lim_higher & y_raw>voltage_plot_lim_lower);
         [filter_ind,~] = intersect(x_filter_ind,y_filter_ind);
@@ -302,7 +323,11 @@ for i = 1:n_pmt_channel
         y_filtered = y_raw(filter_ind);
         scatter(x_filtered,y_filtered, 3,color_rbg(i,:),'filled')
         symlog('y')
-        ylabel(append(rpt_title_color_lab(i), ' (mV)'))
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            ylabel('fxm volume (au)')
+        else
+            ylabel(append(rpt_title_color_lab(i), ' (mV)'))
+        end
         xlabel("Buoyant mass (pg)")
         title(append(sample_name, ' ', rpt_title_color_lab(i), ' vs BM'))
         legend(['n' '=' int2str(length(y_filtered))],'location',"northwest",'FontSize',9)
@@ -311,8 +336,12 @@ end
 for i = 1:n_pmt_channel
 %     subplot(2,n_pmt_channel,i+n_pmt_channel);
     axes(ha(i+n_pmt_channel));
-        x_raw = readout_paired(:,2); 
-        y_raw = readout_paired(:,i+2); % +2 to account for time and smr data column
+        x_raw = readout_paired.buoyant_mass_pg; 
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            y_raw = readout_paired.vol_au;
+        else
+            y_raw = readout_paired.(['pmt',num2str(i),'_mV']); 
+        end
         x_filter_ind = find(x_raw<smr_plot_lim_higher & x_raw>smr_plot_lim_lower);
         y_filter_ind = find(y_raw<voltage_plot_lim_higher & y_raw>voltage_plot_lim_lower);
         [filter_ind,~] = intersect(x_filter_ind,y_filter_ind);
@@ -320,7 +349,11 @@ for i = 1:n_pmt_channel
         y_filtered = y_raw(filter_ind);
         scatter(x_filtered,y_filtered, 3,color_rbg(i,:),'filled')
         symlog('xy')
-        ylabel(append(rpt_title_color_lab(i), ' (mV)'))
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            ylabel('fxm volume (au)')
+        else
+            ylabel(append(rpt_title_color_lab(i), ' (mV)'))
+        end
         xlabel("Buoyant mass (pg)")
         title(append(sample_name, ' ', rpt_title_color_lab(i), ' vs BM'))
         set(gca,'FontSize',12)
@@ -348,7 +381,7 @@ p.Style = caption_style;
 append(ch2,p);
 
 n_bin_bm = zeros(1,2);
-bm_size = [length(smr_data.smr), length(readout_paired(:,1))];
+bm_size = [height(smr_input), height(readout_paired)];
 for i = 1:length(n_bin_bm)
     if bm_size(i) < 1000
        n_bin_bm(i) = 20;
@@ -364,7 +397,7 @@ for i = 1:length(n_bin_bm)
 end
 
 n_bin_pmt = zeros(1,2);
-pmt_size = [length(pmt_data.time), length(readout_paired(:,1))];
+pmt_size = [height(pmt_input), height(readout_paired)];
 for i = 1:length(n_bin_pmt)
     if pmt_size(i) < 1000
        n_bin_pmt(i) = 10;
@@ -389,20 +422,30 @@ ha = tight_subplot(n_pmt_channel+1,2,[.05 .08],[.05 .03],[.1 .05]);
     
 for i = 1:n_pmt_channel+1
     axes(ha(i*2));
-    obj2plot =readout_paired(:,i+1); %+1 to account for time column
     if i ==1
+        obj2plot =readout_paired.buoyant_mass_pg; 
         obj2plot = obj2plot(obj2plot<smr_plot_lim_higher & obj2plot>smr_plot_lim_lower);
         hh=histogram(obj2plot,n_bin_bm(2));
         xlabel("Buoyant mass (pg)")
         title("Paired SMR signal distribution")
         xlim([smr_plot_lim_lower,smr_plot_lim_higher])
     else
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i-1
+            obj2plot = readout_paired.vol_au;
+        else
+            obj2plot = readout_paired.(['pmt',num2str(i-1),'_mV']); 
+        end
         obj2plot = obj2plot(obj2plot<voltage_plot_lim_higher & obj2plot>voltage_plot_lim_lower);
         [~,edges] = histcounts(log10(obj2plot),n_bin_pmt(2));
         hh = histogram(obj2plot,10.^edges);
         xlim([voltage_plot_lim_lower,voltage_plot_lim_higher])
         set(gca, 'xscale','log')
-        xlabel(append(rpt_title_color_lab(i-1), ' (mV)'))
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i-1
+            xlabel('fxm volume (au)')
+        else
+            xlabel(append(rpt_title_color_lab(i-1), ' (mV)'))
+        end
+        
         title(append(' Paired ', rpt_title_color_lab(i-1), ' signal distribution'))
         hh.FaceColor = color_rbg(i-1,:);
     end
@@ -415,19 +458,28 @@ end
 for i = 1:n_pmt_channel+1
     axes(ha(i*2-1));
     if i ==1
-        obj2plot =smr_data.smr;
+        obj2plot =smr_input.buoyant_mass_pg;
         obj2plot = obj2plot(obj2plot<smr_plot_lim_higher & obj2plot>smr_plot_lim_lower);
         hh=histogram(obj2plot,n_bin_bm(1));
         xlabel("Buoyant mass (pg)")
         title("Raw SMR signal distribution")
         xlim([smr_plot_lim_lower,smr_plot_lim_higher])
     else
-        obj2plot =pmt_data.pmt{i-1}; %-1 to account for smr plotting
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i-1
+            obj2plot = pmt_input.vol_au;
+        else
+            obj2plot = pmt_input.(['pmt',num2str(i-1),'_mV']); 
+        end
+        
         obj2plot = obj2plot(obj2plot<voltage_plot_lim_higher & obj2plot>voltage_plot_lim_lower);
         [~,edges] = histcounts(log10(obj2plot),n_bin_pmt(1));
         hh = histogram(obj2plot,10.^edges);
         set(gca, 'xscale','log')
-        xlabel(append(rpt_title_color_lab(i-1), ' (mV)'))
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i-1
+            xlabel('fxm volume (au)')
+        else
+            xlabel(append(rpt_title_color_lab(i-1), ' (mV)'))
+        end
         title(append(' Raw ', rpt_title_color_lab(i-1), ' signal distribution'))
         hh.FaceColor = color_rbg(i-1,:);
         xlim([voltage_plot_lim_lower,voltage_plot_lim_higher])
@@ -463,12 +515,17 @@ ha = tight_subplot(2,n_pmt_channel,[.15 .04],[.1 .05],[.03 .005]);
 
 for i = 1:n_pmt_channel
     axes(ha(i));
-        x_raw = readout_paired(:,2); % +1 to account for time and smr data column
-        y_raw = readout_paired(:,8); 
+        x_raw = readout_paired.buoyant_mass_pg;
+        y_raw = readout_paired.pmt2smr_transit_time_ms; 
         x_filter_ind = find(x_raw<smr_plot_lim_higher & x_raw>smr_plot_lim_lower);
         x_filtered = x_raw(x_filter_ind);
         y_filtered = y_raw(x_filter_ind);
-        color_overlay = readout_paired(:,i+2);
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            color_overlay = readout_paired.vol_au;
+        else
+            color_overlay = readout_paired.(['pmt',num2str(i),'_mV']);
+        end
+        
         color_overlay = color_overlay(x_filter_ind);
         scatter(x_filtered,y_filtered,5,color_overlay,'filled')
         ylabel('PMT to SMR transit time (ms)')
@@ -480,16 +537,25 @@ for i = 1:n_pmt_channel
 %         caxis([prctile(color_overlay,10) prctile(color_overlay,90)]);
         title(append(sample_name, ' ', 'Transit time', ' vs BM'))
         legend(['n' '=' int2str(length(y_filtered))],'location',"southeast")
-        set(get(c,'title'),'string',append(rpt_title_color_lab(i), ' (mV)'),'Rotation',0);
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            set(get(c,'title'),'string','fxm volume (au)','Rotation',0);
+        else
+            set(get(c,'title'),'string',append(rpt_title_color_lab(i), ' (mV)'),'Rotation',0);
+        end
+        
 end
 for i = 1:n_pmt_channel
     axes(ha(i+n_pmt_channel));
-        x_raw = readout_paired(:,2); % +1 to account for time and smr data column
-        y_raw = readout_paired(:,8); 
+        x_raw = readout_paired.buoyant_mass_pg;
+        y_raw = readout_paired.pmt2smr_transit_time_ms; 
         x_filter_ind = find(x_raw<smr_plot_lim_higher & x_raw>smr_plot_lim_lower);
         x_filtered = x_raw(x_filter_ind);
         y_filtered = y_raw(x_filter_ind);
-        color_overlay = readout_paired(:,i+2);
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            color_overlay = readout_paired.vol_au;
+        else
+            color_overlay = readout_paired.(['pmt',num2str(i),'_mV']);
+        end
         color_overlay = color_overlay(x_filter_ind);
         scatter(x_filtered,y_filtered,5,color_overlay,'filled')
         ylabel('PMT to SMR transit time (ms)')
@@ -502,7 +568,11 @@ for i = 1:n_pmt_channel
 %        caxis([prctile(color_overlay,10) prctile(color_overlay,90)]);
         title(append(sample_name, ' ', 'Transit time', ' vs BM'))
         legend(['n' '=' int2str(length(y_filtered))],'location',"southeast")
-        set(get(c,'title'),'string',append(rpt_title_color_lab(i), ' (mV)'),'Rotation',0);
+        if analysis_params.fxm_mode == 1 && analysis_params.fxm_channel==i
+            set(get(c,'title'),'string','fxm volume (au)','Rotation',0);
+        else
+            set(get(c,'title'),'string',append(rpt_title_color_lab(i), ' (mV)'),'Rotation',0);
+        end
 end
 
 print(gcf,'-dpng','-r400','temp_high_res_image_7')
@@ -521,12 +591,12 @@ if analysis_params.fxm_mode == 1
     append(ch2,Section('title',rpt_title));
 
     % grab lower 99% of mass, volume, and density measurements (filter out outliers for plotting)
-    density_au = readout_paired(:,2)./readout_paired(:,fxm_channel_column);
+    density_au = readout_paired.buoyant_mass_pg./readout_paired.vol_au;
     high_percentile = 99;
     plot_lim_lower = 0;
     dens_plot_lim_higher = prctile(density_au, high_percentile);
     bm_plot_lim_higher = smr_plot_lim_higher;
-    vol_plot_lim_higher = prctile(readout_paired(:,fxm_channel_column), high_percentile);
+    vol_plot_lim_higher = prctile(readout_paired.vol_au, high_percentile);
 
     p = Paragraph(['This is looking at comparisons of calculated mass, volume, '...
         'and density. This is BEFORE applying the volume conversion factor, such that density and volume are in arbitrary units (AU). ']);
@@ -545,8 +615,8 @@ if analysis_params.fxm_mode == 1
     figure('OuterPosition',[0*scrsize(3) 0.2*scrsize(4) 0.92*scrsize(3) 0.5*scrsize(4)]);
     ha = tight_subplot(1,3,[.15 .05],[.1 .05]);
 
-    temp_mass = readout_paired(:,2);
-    temp_vol = readout_paired(:,fxm_channel_column);
+    temp_mass = readout_paired.buoyant_mass_pg;
+    temp_vol = readout_paired.vol_au;
 
     % 99th percentile filtered mass,volume,density
     ind_density = find(density_au<dens_plot_lim_higher & density_au>plot_lim_lower);
@@ -602,7 +672,7 @@ if analysis_params.fxm_mode == 1
 
     figure('OuterPosition',[0 0.5*scrsize(4) 0.95*scrsize(3) 0.3*scrsize(4)]);
 
-    temp_time = readout_paired(:,1);
+    temp_time = readout_paired.elapsed_time_min;
 
     scatter(temp_time(ind_plot),filtered_density,5,'filled');
     ylabel('Density (AU)')

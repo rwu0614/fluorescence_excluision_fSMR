@@ -336,21 +336,15 @@ pause(0.5)
 
 full_readout_pmt.signal = full_readout_pmt.signal_V*1000; %Convert to mV
 output_pmt = [full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal((cell_pass_ind),:)];
-output_pmt_table = array2table(output_pmt);
-output_pmt_table.Properties.VariableNames = {'real_time_sec','pmt1_mV','pmt2_mV','pmt3_mV','pmt4_mV','pmt5_mV'};
-if fxm_mode == 1
-    output_pmt_table.Properties.VariableNames{fxm_channel+1} = 'vol_au'; %% rename fxm channel with 1 offset colume of timestamp
-end
 
 cd(input_info.pmt_dir(1))
 if fxm_mode == 0
-    out_file_name = ['readout_pmt_uncompensated_' sample_name '.txt'];
+    out_file_name = ['readout_pmt_uncompensated_' sample_name '.csv'];
 else
-    out_file_name = ['readout_pmt_fxm_other_uncompensated_' sample_name '.txt'];
+    out_file_name = ['readout_pmt_fxm_other_uncompensated_' sample_name '.csv'];
 end
-writetable(output_pmt_table, out_file_name, 'delimiter', '\t');
+dlmwrite(out_file_name, output_pmt, 'delimiter', ',', 'precision', 25);
 cd(currentFolder)
-
 output_msg = 'Generating output... done';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg});
 pause(0.5)

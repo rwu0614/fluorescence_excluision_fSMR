@@ -20,6 +20,7 @@ instruction_path = [input_info.instruction_dir,'\',input_info.instruction_filena
 
 % Specify base FBM and metadata table format
 FBM_var_to_include = {'real_time_sec','elapsed_time_min','buoyant_mass_pg','node_deviation_hz','pmt1_mV','pmt2_mV','pmt3_mV','pmt4_mV','pmt5_mV','pmt2smr_transit_time_ms'};
+%FBM_var_to_include = {'buoyant_mass','pmt1','pmt2','pmt3'}; % for older readout_pairing version
 instruct_var_to_exclude = {'path','filename'}; % metadata sheet will include all variables from the instruction sheet except variables specified here
 
 % Input UI to specify names for FBM and metadata output
@@ -59,6 +60,7 @@ for i = 1:height(instruction)
     sample_instruction = instruction(i,:);
     paired_data = readtable([sample_instruction.path{:},'\',sample_instruction.filename{:}]);
     pre_merge_data = paired_data;
+    pre_merge_data.Properties.VariableNames = paired_data_var_names;
     
     % create unique cell id based on date of measurement and sample name 
     cell_id = {};

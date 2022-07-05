@@ -226,18 +226,23 @@ select_smrpeaks_fast;
 %=================================================================%
 
 
-%% Output readout file
-%Write txt file, NOTE: a high precision number is required to output
-%full length time-stamps of each signal. This is crucial for accurate
-%pairing to the pmt signals
+%% Output readout csv file
 % datasmr_good format is [tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm'];
 
 output_matrix = [datasmr_good(:,1),datasmr_good(:,3),datasmr_good(:,11)]; %time, mean peakhight, mean node deviation
-output_table = array2table(output_matrix);
-output_table.Properties.VariableNames = {'real_time_sec','buoyant_mass_hz','node_deviation_hz'};
+
 cd(input_info.smr_dir)
-out_file_name = ['readout_smr_' sample_name '.txt'];
-writetable(output_table, out_file_name, 'delimiter', '\t');
+out_file_name = ['readout_smr_' sample_name '.text'];
+%Write csv file, NOTE: a high precision number is required to output
+%full length time-stamps of each signal. This is crucial for accurate
+%pairing to the pmt signals
+
+delete(out_file_name)
+fileID = fopen(out_file_name,'w');
+fprintf(fileID,'%25s %25s %25s\r\n','real_time_sec','buoyant_mass_hz','node_deviation_hz');
+fprintf(fileID,'%25f %25f %25f\n',output_matrix');
+fclose(fileID);
+
 cd(currentFolder)
 
 %% Generate report file

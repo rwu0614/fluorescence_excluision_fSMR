@@ -50,8 +50,8 @@ end
 %% ================== estimated data points per frequency peak & noise in system ==============
 %added 03/22/2019
 % estimated_datapoints = 200; %for full transit; deafult
-noise_data_keep = rmoutliers(diff(x),'percentiles',[1,99]);
-analysis_params.estimated_noise = std(noise_data_keep)*3;
+noise_data_keep = rmoutliers(diff(xtest),'percentiles',[1,99]);
+analysis_params.estimated_noise = 
 
 sgolay_length_idx = 1; %this will make default length of 5 for 50 idx transits
 sgolay_length = 2*round(sgolay_length_idx*(estimated_datapoints/50))+1;
@@ -66,7 +66,6 @@ legend('raw', 'sgolay 3-5', strcat('sgolay 3-', num2str(sgolay_length)));
 else
 legend('raw', 'sgolay 3-5');
 end
-
 
 % noise_estimate_frame = input('What is the x-axis frame for estimating noise? [_,_]');
 % measured_noise = std(xtest(noise_estimate_frame));
@@ -134,6 +133,13 @@ ydata_thres=ydata_thres-analysis_params.offset_input;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 idx = find(ydata < ydata_thres);                                                  % find all y_diff values that pass this threshold - these are the main peaks
+
+idx_base = find(ydata > ydata_thres); % find all baseline value
+plot(xdata(idx_base),ydata(idx_base));
+hold on
+plot(xdata(idx),ydata(idx));
+disp(std(xtest(0,5000)))
+input('pause')
 
 repeatflag = 1;
 while(repeatflag == 1)

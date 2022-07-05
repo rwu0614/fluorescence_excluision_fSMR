@@ -206,7 +206,7 @@ pairing_stats = [prt_paired_smr,prt_paired_pmt,dropout_rate,length(paired_smr_in
 
 %format follows: SMR input table merged with PMT input table, each row is a
 %paired particle
-readout_paired = [smr_input(paired_smr_ind,:),pmt_input(paired_pmt_ind,2:end)];
+readout_paired = [smr_input(paired_smr_ind,:),pmt_input(paired_smr_ind,2:end)];
 readout_paired.elapsed_time_min = (smr_input.real_time_sec(paired_smr_ind)-smr_input.real_time_sec(paired_smr_ind(1)))/60;
 readout_paired.pmt2smr_transit_time_ms = paired_delta_t;
 % datetime(3.715875052615539e+09, 'ConvertFrom','epochTime','Epoch','1904-01-01')

@@ -1,0 +1,43 @@
+clear all
+close all 
+clc
+currentFolder = pwd;
+addpath('plotting_functions\');
+addpath('analysis_functions\');
+
+%% Input base FBM and metadata txt files
+% Ask user for base FBM txt file
+fprintf('\nGetting base FBM matrix...')
+[input_info.fbm_filename, input_info.fbm_dir,~] = uigetfile('../*.*','Select base FBM .txt File', ' ');
+fprintf('\n%s selected for analysis\n', input_info.fbm_filename)
+fbm_file_fullname = strcat(input_info.fbm_dir, input_info.fbm_filename); 
+fbm_base = readtable(fbm_file_fullname,'ReadRowNames',true,'ReadVariableNames',true,'Delimiter',' ');
+head(fbm_base)
+
+% Ask user for base metadata txt file
+fprintf('\nGetting base metadata sheet...')
+[input_info.metadata_filename, input_info.metadata_dir,~] = uigetfile('../*.*','Select base FBM .txt File', ' ');
+fprintf('\n%s selected for analysis\n', input_info.metadata_filename)
+metadata_file_fullname = strcat(input_info.metadata_dir, input_info.metadata_filename); 
+metadata_base = readtable(metadata_file_fullname,'ReadRowNames',true,'ReadVariableNames',true,'Delimiter',' ');
+head(metadata_base)
+
+% Input UI to grab path to FBM_metadata_assembly_instruction sheet
+fprintf('\nGetting FBM metadata assembly instruction...\n')
+[input_info.instruction_filename, input_info.instruction_dir, exist_pmt] = uigetfile('../*.*','Select FBM metadata assembly instruction File',' ');
+instruction_path = [input_info.instruction_dir,'\',input_info.instruction_filename];
+opts = detectImportOptions(instruction_path,'ReadVariableNames',true,'VariableNamingRule','preserve','Delimiter',',');
+opts = setvartype(opts,'string');
+report_table = readtable(instruction_path,opts);
+
+%Convert all metadata element to string
+var = metadata_base.Properties.VariableNames;
+for i = var
+   metadata_base.(i{:}) = string(metadata_base.(i{:}));
+end
+
+%% Gating and annotation - single cell -> live -> G1/SG2
+%initializing metadata sheet with all the gating annotation
+metadata_gate = metadata_base;
+%initializing fbm for gating
+fbm_gate = fbm_base;
