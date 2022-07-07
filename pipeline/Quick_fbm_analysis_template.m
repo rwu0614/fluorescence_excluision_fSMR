@@ -47,24 +47,41 @@ for i = 1:length(fluid_den)
     fbm_gate.buoyant_mass_pg_inwater(ind_fbm_sample_fluid_temp) = fbm_gate.buoyant_mass_pg(ind_fbm_sample_fluid_temp) +(str2num(fluid_den(i))-1)*fbm_gate.volume_fL(ind_fbm_sample_fluid_temp);
 end
 
+%%
+% SNACS = NV - m(V_ref-V)
+fbm_gate.nv = fbm_gate.node_deviation_hz./fbm_gate.volume_fL;
 
+%%
+figure(1)
+scatter(fbm_gate.volume_fL,fbm_gate.nv)
+xlabel('Volume fL')
+ylabel('Node deviation / Volume')
+hold on
 
+vol_cutoff_forfit = [776,3148];
+nv_cutoff_forfit = [-10^-3,2*10^-3];
 
+for_fit_ind = find(fbm_gate.volume_fL>vol_cutoff_forfit(1)&...
+    fbm_gate.volume_fL<vol_cutoff_forfit(2)&...
+    fbm_gate.nv>nv_cutoff_forfit(1)&...
+    fbm_gate.nv<nv_cutoff_forfit(2));
 
+scatter(fbm_gate.volume_fL(for_fit_ind),fbm_gate.nv(for_fit_ind))
 
+temp_stats = regstats(fbm_gate.nv(for_fit_ind),fbm_gate.volume_fL(for_fit_ind),'linear');
 
+m = temp_stats.beta(2);
 
+fbm_gate.snacs = fbm_gate.nv + m*(median(fbm_gate.volume_fL)-fbm_gate.volume_fL);
 
+%%
+figure(3)
+scatter(fbm_gate.volume_fL(for_fit_ind),fbm_gate.nv(for_fit_ind),5,fbm_gate.snacs(for_fit_ind))
+figure(4)
+scatter(fbm_gate.volume_fL,fbm_gate.snacs,5)
 
-
-
-
-
-
-
-
-
-
-
+%%
+figure(5)
+scatter(fbm_gate.density_gcm3(for_fit_ind),fbm_gate.snacs(for_fit_ind),5,fbm_gate.volume_fL(for_fit_ind))
 
 
