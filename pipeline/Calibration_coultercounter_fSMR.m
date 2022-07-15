@@ -41,27 +41,30 @@ for i = 1:height(Vol_data)
     sc_count_start_ind = sc_count_start_ind+bin_count+1;
 end
 %% Set single cell volume range for calibration
+vol_ceiling =(4*pi*(40./2).^3)/3; % for 40um filter
 figure(1)
 set(gcf, 'Position',[236,478,1500,420])
 subplot(1,2,1)
 histogram('BinEdges',[0;Vol_data.volume_fL]','BinCounts',Vol_data.count)
 % hold on
 % histogram(mock_sc_vol,'BinWidth',20)
-xlim([0,5000])
+xlim([0,vol_ceiling])
+set(gca,'Xscale','log')
 xlabel('Volume (fL)')
 ylabel('Count')
 title('Coulter counter all size bins')
 subplot(1,2,2)
-coulter_range_input = input('\nCoulter volume range [ , ]:');
-vol_cut_low = coulter_range_input(1);
-vol_cut_high = coulter_range_input(2);
+vol_range = input('\nCoulter volume range cutoff [ , ]:');
+vol_cut_low = vol_range(1);
+vol_cut_high = vol_range(2);
 ind_vol_range = find(Vol_data.volume_fL>vol_cut_low & Vol_data.volume_fL<vol_cut_high);
 target_vol_data = Vol_data(ind_vol_range,:);
 subplot(1,2,2)
 histogram('BinEdges',[0;Vol_data.volume_fL]','BinCounts',Vol_data.count)
 hold on
 histogram('BinEdges',[vol_cut_low;target_vol_data.volume_fL]','BinCounts',target_vol_data.count)
-xlim([0,5000])
+xlim([0,vol_ceiling])
+set(gca,'Xscale','log')
 xlabel('Volume (fL)')
 ylabel('Count')
 title('Coulter volume range for fSMR calibration')
@@ -74,6 +77,7 @@ target_vol_data.cum_count(1) = target_vol_data.count(1);
 for i = 2:height(target_vol_data)
     target_vol_data.cum_count(i) = target_vol_data.cum_count(i-1)+target_vol_data.count(i);
 end
+target_vol_data.normalized_count = round(target_vol_data.count.*(height(sample)/target_vol_data.cum_count(end)))*1.2;
 
 median_ind = median(1:1:target_vol_data.cum_count(end));
 [~,vol_ind] = min(abs(target_vol_data.cum_count-median_ind));
@@ -120,11 +124,12 @@ subplot(1,2,1)
     legend(["Score","Calibration by median","Refined calibration"])
 subplot(1,2,2)
     pre_pass_sample_vol_fL = sample_calibration.vol_au.*refine_calibration_factor;
-    histogram(pre_pass_sample_vol_fL)
+    histogram(pre_pass_sample_vol_fL,'BinEdges',[0;target_vol_data.volume_fL]')
     hold on
-    histogram('BinEdges',[0;Vol_data.volume_fL]','BinCounts',Vol_data.count)
+    histogram('BinEdges',[0;target_vol_data.volume_fL]','BinCounts',target_vol_data.normalized_count)
     xlim([vol_cut_low,vol_cut_high])
     xlabel('Volume (fL)')
+    set(gca,'Xscale','log')
     legend(["fSMR volume with refined calibration","Coulter Counter"])
 
 refinement_pass = input("\nDoes volume calibration looks good? Input 1 if yes:");
