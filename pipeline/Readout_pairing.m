@@ -55,7 +55,7 @@ else
 
     %fprintf('\nGetting PMT data...\n')
     input_info.pmt_dir = input_dir;
-    S = dir(fullfile(input_info.pmt_dir  ,sprintf('*readout_pmt*.txt')));
+    S = dir(fullfile(input_info.pmt_dir  ,sprintf('*compensate*.txt')));
     input_info.pmt_filename = S.name;
     cd(input_info.pmt_dir)
     pmt_input = readtable(input_info.pmt_filename);

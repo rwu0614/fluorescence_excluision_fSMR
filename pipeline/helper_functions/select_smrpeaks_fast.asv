@@ -4,7 +4,7 @@ global number_bad_peaks
 % datasmr_good format is [tm' tm'/60 mm' bm' bs' m1' m2' m3' nd1' nd2' ndm' w' bd' vs' sectnum' tm'/3600 mm'/2 pkorder' ndm'./mm'];
 
 coeff_peak_bal = 0.1; %the peak imbalance in percentage relative to mean mass
-coeff_node_bal = analysis_params.estimated_noise*4;
+coeff_node_bal = analysis_params.estimated_noise*2;
 coeff_node_peak = 0.2; %node that is bigger than 20% is ditched.
 
 idx_discard_bmdiff = find(abs((datasmr(:,6)-datasmr(:,8))./datasmr(:,3)) > coeff_peak_bal);

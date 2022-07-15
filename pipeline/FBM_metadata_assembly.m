@@ -19,7 +19,7 @@ fprintf('\nGetting FBM metadata assembly instruction...\n')
 instruction_path = [input_info.instruction_dir,'\',input_info.instruction_filename];
 
 % Specify base FBM and metadata table format
-FBM_var_to_include = {'real_time_sec','elapsed_time_min','buoyant_mass_pg','node_deviation_hz','pmt1_mV','pmt2_mV','pmt3_mV','pmt4_mV','pmt5_mV','pmt2smr_transit_time_ms'};
+FBM_var_to_search = {'real_time_sec','elapsed_time_min','buoyant_mass_pg','node_deviation_hz','pmt1_mV','pmt2_mV','pmt3_mV','pmt4_mV','pmt5_mV','vol_au','pmt2smr_transit_time_ms'};
 instruct_var_to_exclude = {'path','filename'}; % metadata sheet will include all variables from the instruction sheet except variables specified here
 
 % Input UI to specify names for FBM and metadata output
@@ -57,7 +57,9 @@ metadata_base =[];
 
 for i = 1:height(instruction)
     sample_instruction = instruction(i,:);
-    paired_data = readtable([sample_instruction.path{:},'\',sample_instruction.filename{:}]);
+    sample_path = [sample_instruction.path{:},'\',sample_instruction.filename{:}];
+    opts = detectImportOptions(sample_path,'ReadVariableNames',true,'VariableNamingRule','preserve','Delimiter','\t');
+    paired_data = readtable(sample_path,opts);
     pre_merge_data = paired_data;
     
     % create unique cell id based on date of measurement and sample name 
@@ -82,15 +84,15 @@ for i = 1:height(instruction)
     
     metadata_base = vertcat(metadata_base,pre_meta);
 end
-
+FBM_var_to_include = intersect(FBM_var_to_search,merge_paired_data.Properties.VariableNames);
 FBM_base = merge_paired_data(:,FBM_var_to_include);
 
 %% generate output txt files 
 % Save files in the same folder as the assembly instruction sheet
 [instruction_rootdir,~,~] = fileparts(instruction_path);
 cd(instruction_rootdir)
-    writetable(FBM_base,FBM_name,'Delimiter',' ','WriteRowNames',true)
-    writetable(metadata_base,metadata_name,'Delimiter',' ','WriteRowNames',true)
+    writetable(FBM_base,FBM_name,'Delimiter','\t','WriteRowNames',true)
+    writetable(metadata_base,metadata_name,'Delimiter','\t','WriteRowNames',true)
     disp('Base FBM top rows:')
     head(FBM_base)
     disp('Base metadata top rows:')

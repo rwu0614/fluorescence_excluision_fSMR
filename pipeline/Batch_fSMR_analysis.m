@@ -65,7 +65,7 @@ for i = 1:length(instruction.path)
     analysis_params_pair.hz2pg_factor = str2double(instruction.hz2pg_factor(i));
     
     %initiate SMR analysis
-     SMR_readout(instruction.path(i));
+    SMR_readout(instruction.path(i));
     
     %initiate PMT analysis
     pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);

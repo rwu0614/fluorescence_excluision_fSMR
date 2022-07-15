@@ -60,8 +60,8 @@ if nargin==0
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = -3; 
-    analysis_params.detect_thresh_pmt(3) = 10;
+    analysis_params.detect_thresh_pmt(2) = 2.5; 
+    analysis_params.detect_thresh_pmt(3) = 2.5;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
