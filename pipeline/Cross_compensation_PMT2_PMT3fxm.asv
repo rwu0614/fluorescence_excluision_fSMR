@@ -1,0 +1,72 @@
+clear 
+close all
+format long;
+currentFolder = pwd;
+addpath('report_functions\');
+addpath('helper_functions\');
+addpath('plotting_functions\');
+%%
+% Input UI to grab path to fullflex pmt readout fullflex_pmt txt file
+fprintf('\nGetting fullflex pmt fullflex_pmt...\n')
+[input_info.fullflex_pmt_filename, input_info.fullflex_pmt_dir, ~] = uigetfile('../*.*','Select Readout_pmt_fxm_fullflex_[sample name].txt',' ');
+fullflex_pmt_path = [input_info.fullflex_pmt_dir,'\',input_info.fullflex_pmt_filename];
+opts = detectImportOptions(fullflex_pmt_path,'ReadVariableNames',true,'VariableNamingRule','preserve','Delimiter','\t');
+fullflex_pmt = readtable(fullflex_pmt_path,opts);
+name_split = strsplit(input_info.fullflex_pmt_dir,'\');   
+sample = name_split{end-1};   
+sample_name= strrep(sample,'_',' ');
+
+% Set pmt2 to pmt3 spillover factor
+s = 0.005;
+
+%%
+amp_detect_ch2 = fullflex_pmt.pmt2_amp_mV;
+amp_detect_ch3 = fullflex_pmt.pmt3_amp_mV;
+base_detect_ch2 = fullflex_pmt.pmt2_baseline_mV;
+base_detect_ch3 = fullflex_pmt.pmt3_baseline_mV;
+
+amp_true_ch2 = (base_detect_ch3.*amp_detect_ch2-base_detect_ch2.*amp_detect_ch3)./(base_detect_ch3-s*base_detect_ch2);
+amp_true_ch3 = amp_detect_ch3-s*amp_true_ch2;
+
+
+pmt_out = fullflex_pmt;
+
+pmt_out.vol_au = abs(amp_true_ch3-base_detect_ch3)./base_detect_ch3;
+pmt_out.pmt1_mV = abs(pmt_out.pmt1_amp_mV - pmt_out.pmt1_baseline_mV);
+pmt_out.pmt2_mV = amp_true_ch2;
+pmt_out.pmt4_mV = abs(fullflex_pmt.pmt4_amp_mV-fullflex_pmt.pmt4_baseline_mV.*...
+             (amp_true_ch3./base_detect_ch3));
+pmt_out.pmt5_mV = abs(fullflex_pmt.pmt5_amp_mV-fullflex_pmt.pmt5_baseline_mV.*...
+             (amp_true_ch3./base_detect_ch3));
+
+
+%%
+figure(1)
+scatter(pmt_out.pmt2_mV,pmt_out.vol_au,5,'filled')
+hold on
+scatter(pmt_out.pmt2_mV,abs(amp_detect_ch3-base_detect_ch3)./base_detect_ch3,5,'filled')
+symlog()
+
+%%
+figure(1)
+scatter(pmt_out.pmt2_am_mV-pmt_out.pmt2_mV,pmt_out.vol_au,5,'filled')
+hold on
+scatter(pmt_out.pmt2_mV,vol_au,5,'filled')
+symlog()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
