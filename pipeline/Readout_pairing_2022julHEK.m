@@ -1,4 +1,4 @@
-function pairing_stats=Readout_pairing(varargin)
+function pairing_stats=Readout_pairing_2022julHEK(varargin)
 
 if nargin ==0
     clear;
@@ -55,7 +55,7 @@ else
 
     %fprintf('\nGetting PMT data...\n')
     input_info.pmt_dir = input_dir;
-    S = dir(fullfile(input_info.pmt_dir  ,sprintf('*readout_pmt*.txt')));
+    S = dir(fullfile(input_info.pmt_dir  ,sprintf('*compensate*.txt')));
     input_info.pmt_filename = S.name;
     cd(input_info.pmt_dir)
     pmt_input = readtable(input_info.pmt_filename);
@@ -206,7 +206,7 @@ pairing_stats = [prt_paired_smr,prt_paired_pmt,dropout_rate,length(paired_smr_in
 
 %format follows: SMR input table merged with PMT input table, each row is a
 %paired particle
-readout_paired = [smr_input(paired_smr_ind,:),pmt_input(paired_smr_ind,2:end)];
+readout_paired = [smr_input(paired_smr_ind,:),pmt_input(paired_pmt_ind,2:end)];
 readout_paired.elapsed_time_min = (smr_input.real_time_sec(paired_smr_ind)-smr_input.real_time_sec(paired_smr_ind(1)))/60;
 readout_paired.pmt2smr_transit_time_ms = paired_delta_t;
 % datetime(3.715875052615539e+09, 'ConvertFrom','epochTime','Epoch','1904-01-01')
@@ -223,5 +223,19 @@ report_dir = [input_info.pmt_dir '\' sample_name '_report\Pairing_report\'];
 mkdir(report_dir)
 
 Readout_pairing_report_v1(report_dir,input_info,sample_name,smr_data,smr_input,pmt_input,analysis_params,trace, window,min_time_threshold,max_time_threshold,readout_paired,multiplet_count);
-
+%% Output figure
+density_au = readout_paired.buoyant_mass_pg./readout_paired.vol_au;
+figure;
+scatter(readout_paired.pmt2_mV,density_au,5,'filled');
+plot_lim_lower = prctile(density_au,1);
+plot_lim_higher = prctile(density_au,99);
+ylim([plot_lim_lower,plot_lim_higher])
+symlog('x')
+xlabel('GFP (mV)')
+ylabel('Density (au)')
+cd(input_info.pmt_dir)
+cd ..
+    print(gcf,[sample_name,' spillover_check.png'],'-dpng','-r1200');
+cd(currentFolder)
+close all
 end

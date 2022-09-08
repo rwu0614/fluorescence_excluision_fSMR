@@ -1,4 +1,4 @@
-function pass_rate = PMT_readout_combo(varargin)
+function pass_rate = PMT_readout_combo_2022julHEK(varargin)
 % input should be empty for one-time execution on a single sample. For
 % batch analysis, use PMT_readout_combo(input_directory,batch_analysis_params)
 % batch_analysis_params should have the same field as the analysis_params
@@ -311,19 +311,28 @@ end
 waitbar(1,progress_bar,{QC_msg,upComp_msg});
 pause(0.5)
 %% Apply compensation to fxm - downstream channel to remove effect from fxm spillover
-full_readout_pmt.signal_V = abs(full_readout_pmt.amplitude-full_readout_pmt.baseline);
+full_readout_pmt.amplitude_mV = full_readout_pmt.amplitude*1000; %Convert to mV
+full_readout_pmt.baseline_mV = full_readout_pmt.baseline*1000; %Convert to mV
+% Set pmt2 to pmt3 spillover factor
+s = 0.042;
 
-% if fxm_mode == 1
-%     full_readout_pmt.signal_V(:,fxm_channel) = abs((full_readout_pmt.amplitude(:,fxm_channel)-full_readout_pmt.baseline(:,fxm_channel))./full_readout_pmt.baseline(:,fxm_channel));
-%     for i= fxm_channel+1:n_pmt_channel
-%         full_readout_pmt.signal_V(:,i) = abs(full_readout_pmt.amplitude(:,i)-full_readout_pmt.baseline(:,i).*...
-%             (full_readout_pmt.amplitude(:,fxm_channel)./full_readout_pmt.baseline(:,fxm_channel)));
-%     end
-%     downComp_msg = sprintf('Fxm downstream compensation applied');
-% else
-%     downComp_msg = sprintf('Fxm downstream compensation skipped');
-% end
-downComp_msg = sprintf('Fxm downstream compensation skipped');
+amp_detect_ch2 = full_readout_pmt.amplitude_mV(:,2);
+amp_detect_ch3 = full_readout_pmt.amplitude_mV(:,3);
+base_detect_ch2 = full_readout_pmt.baseline_mV(:,2);
+base_detect_ch3 = full_readout_pmt.baseline_mV(:,3);
+
+amp_true_ch2 = (base_detect_ch3.*amp_detect_ch2-base_detect_ch2.*amp_detect_ch3)./(base_detect_ch3-s*base_detect_ch2);
+amp_true_ch3 = amp_detect_ch3-s*amp_true_ch2;
+
+full_readout_pmt.signal(:,3) = 1000*abs(amp_true_ch3-base_detect_ch3)./base_detect_ch3;
+full_readout_pmt.signal(:,1) = abs(full_readout_pmt.amplitude_mV(:,1) - full_readout_pmt.baseline_mV(:,1));
+full_readout_pmt.signal(:,2) = amp_true_ch2;
+full_readout_pmt.signal(:,4) = abs(full_readout_pmt.amplitude_mV(:,4) - full_readout_pmt.baseline_mV(:,4).*...
+             (amp_true_ch3./base_detect_ch3));
+full_readout_pmt.signal(:,5) = abs(full_readout_pmt.amplitude_mV(:,5) - full_readout_pmt.baseline_mV(:,5).*...
+             (amp_true_ch3./base_detect_ch3));
+
+downComp_msg = sprintf('Fxm downstream compensation applied');
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg});
 pause(0.5)
 %% Generate PMT readout output file
@@ -334,22 +343,19 @@ pause(0.5)
 output_msg = 'Generating output';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg});
 pause(0.5)
-full_readout_pmt.signal = full_readout_pmt.signal_V*1000; %Convert to mV
-full_readout_pmt.amplitude_mV = full_readout_pmt.amplitude*1000; %Convert to mV
-full_readout_pmt.baseline_mV = full_readout_pmt.baseline*1000; %Convert to mV
-output_pmt = [full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.amplitude_mV((cell_pass_ind),:),full_readout_pmt.baseline_mV((cell_pass_ind),:)];
+
+output_pmt = [full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal((cell_pass_ind),:)];
 output_pmt_table = array2table(output_pmt);
-output_pmt_table.Properties.VariableNames = {'real_time_sec','pmt1_amp_mV','pmt2_amp_mV','pmt3_amp_mV','pmt4_amp_mV','pmt5_amp_mV',...
-    'pmt1_baseline_mV','pmt2_baseline_mV','pmt3_baseline_mV','pmt4_baseline_mV','pmt5_baseline_mV'};
+output_pmt_table.Properties.VariableNames = {'real_time_sec','pmt1_mV','pmt2_mV','vol_au','pmt4_mV','pmt5_mV'};
 % if fxm_mode == 1
 %     output_pmt_table.Properties.VariableNames{fxm_channel+1} = 'vol_au'; %% rename fxm channel with 1 offset colume of timestamp
 % end
 
 cd(input_info.pmt_dir(1))
 if fxm_mode == 0
-    out_file_name = ['readout_pmt_fullflex_' sample_name '.txt'];
+    out_file_name = ['readout_pmt_crosscompensated_' sample_name '.txt'];
 else
-    out_file_name = ['readout_pmt_fxm_fullflex_' sample_name '.txt'];
+    out_file_name = ['readout_pmt_crosscompensated_' sample_name '.txt'];
 end
 writetable(output_pmt_table, out_file_name, 'delimiter', '\t');
 cd(currentFolder)

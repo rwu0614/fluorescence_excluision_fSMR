@@ -68,8 +68,9 @@ for i = 1:height(instruction)
         cell_id = [cell_id;strcat([sample_instruction.measurement_date{:},'_',...
             sample_instruction.sample_name{:},'_',num2str(k,'%02d')])];
     end
-    pre_merge_data.Properties.RowNames = cell_id;
-    merge_paired_data = vertcat(merge_paired_data, pre_merge_data);
+    pre_merge_data.Properties.RowNames = cell_id;    
+    FBM_var_to_include = intersect(FBM_var_to_search,pre_merge_data.Properties.VariableNames);
+    merge_paired_data = vertcat(merge_paired_data, pre_merge_data(:,FBM_var_to_include));
     
     % assembling base metadata sheet
     pre_meta = cell2table(cell(height(pre_merge_data),length(meta_var_to_include)));
@@ -84,8 +85,7 @@ for i = 1:height(instruction)
     
     metadata_base = vertcat(metadata_base,pre_meta);
 end
-FBM_var_to_include = intersect(FBM_var_to_search,merge_paired_data.Properties.VariableNames);
-FBM_base = merge_paired_data(:,FBM_var_to_include);
+FBM_base = merge_paired_data;
 
 %% generate output txt files 
 % Save files in the same folder as the assembly instruction sheet

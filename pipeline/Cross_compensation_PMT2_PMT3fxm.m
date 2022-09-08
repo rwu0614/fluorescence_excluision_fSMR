@@ -51,19 +51,24 @@ figure(2)
 scatter(pmt_out.pmt2_mV,(pmt_out.buoyant_mass_pg./(abs(pmt_out.pmt5_amp_mV-pmt_out.pmt5_baseline_mV)./pmt_out.pmt5_baseline_mV)),5,'filled')
 symlog()
 %%
-figure(2)
-scatter(abs(pmt_out.pmt2_amp_mV-pmt_out.pmt2_baseline_mV),pmt_out.vol_au,5,'filled')
-hold on
-scatter(pmt_out.pmt2_mV,pmt_out.vol_au,5,'filled')
-symlog()
-%%
 figure(3)
 scatter(abs(pmt_out.pmt2_amp_mV-pmt_out.pmt2_baseline_mV),pmt_out.vol_au,5,'filled')
 hold on
 scatter(pmt_out.pmt2_mV,pmt_out.vol_au,5,'filled')
 symlog()
+%%
+figure(4)
+scatter(abs(pmt_out.pmt2_amp_mV-pmt_out.pmt2_baseline_mV),pmt_out.vol_au,5,'filled')
+hold on
+scatter(pmt_out.pmt2_mV,pmt_out.vol_au,5,'filled')
+symlog()
 
-
+%%
+figure(5)
+scatter(pmt_out.buoyant_mass_pg,abs(pmt_out.pmt2_amp_mV-pmt_out.pmt2_baseline_mV),5,'filled')
+hold on
+scatter(pmt_out.buoyant_mass_pg,pmt_out.pmt2_mV,5,'filled')
+symlog()
 
 
 

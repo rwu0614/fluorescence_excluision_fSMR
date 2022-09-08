@@ -16,7 +16,7 @@ head(fbm_base)
 
 % Ask user for base metadata txt file
 fprintf('\nGetting base metadata sheet...')
-[input_info.metadata_filename, input_info.metadata_dir,~] = uigetfile('../*.*','Select base FBM .txt File', ' ');
+[input_info.metadata_filename, input_info.metadata_dir,~] = uigetfile('../*.*','Select base metadata .txt File', ' ');
 fprintf('\n%s selected for analysis\n', input_info.metadata_filename)
 metadata_file_fullname = strcat(input_info.metadata_dir, input_info.metadata_filename); 
 metadata_base = readtable(metadata_file_fullname,'ReadRowNames',true,'ReadVariableNames',true,'Delimiter','\t');
@@ -34,7 +34,7 @@ metadata_gate = metadata_base;
 %initializing fbm for gating
 fbm_gate = fbm_base;
 %%
-sample_median_vol = 1800; 
+sample_median_vol = 1100; 
         
 vol_calibration_factor = sample_median_vol/median(fbm_gate.vol_au);
 fbm_gate.volume_fL = fbm_gate.vol_au*vol_calibration_factor;
@@ -46,7 +46,22 @@ for i = 1:length(fluid_den)
     fbm_gate.density_gcm3(ind_fbm_sample_fluid_temp) = fbm_gate.buoyant_mass_pg(ind_fbm_sample_fluid_temp)./fbm_gate.volume_fL(ind_fbm_sample_fluid_temp)+str2num(fluid_den(i));
     fbm_gate.buoyant_mass_pg_inwater(ind_fbm_sample_fluid_temp) = fbm_gate.buoyant_mass_pg(ind_fbm_sample_fluid_temp) +(str2num(fluid_den(i))-1)*fbm_gate.volume_fL(ind_fbm_sample_fluid_temp);
 end
-
+%%
+figure(1)
+yyaxis left
+scatter(fbm_gate.buoyant_mass_pg,fbm_gate.volume_fL,5,'filled','MarkerFaceAlpha',0.3)
+ylim([400,2300])
+ylabel('Volume (fL)')
+hold on
+yyaxis right
+scatter(fbm_gate.buoyant_mass_pg,fbm_gate.density_gcm3,5,'filled','MarkerFaceAlpha',0.3)
+ylim([0.95,1.15])
+ylabel('Density (g/mL)')
+hYLabel = get(gca,'YLabel');
+    set(hYLabel,'rotation',-90,'VerticalAlignment','bottom')
+xlim([30,100])
+xlabel('Buoyant mass (pg)')
+legend(['n = ',num2str(length(fbm_gate.buoyant_mass_pg))])
 %%
 % SNACS = NV - m(V_ref-V)
 fbm_gate.nv = fbm_gate.node_deviation_hz./fbm_gate.volume_fL;
