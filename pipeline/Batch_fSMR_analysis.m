@@ -73,6 +73,7 @@ for i = 1:length(instruction.path)
     %initiale pairing
     rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
     sample_path_names = strsplit(instruction.path(i),"\");
+    batch_log.path(i) = instruction.path(i);
     batch_log.sample_ID(i) = sample_path_names(end-1);
     batch_log.pct_PMT_QCpass(i) = pmt_log_temp;
     batch_log.pct_SMR_paired(i) = rpt_log_temp(1);
