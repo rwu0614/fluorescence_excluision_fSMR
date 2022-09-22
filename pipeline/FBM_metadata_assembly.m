@@ -19,7 +19,7 @@ fprintf('\nGetting FBM metadata assembly instruction...\n')
 instruction_path = [input_info.instruction_dir,'\',input_info.instruction_filename];
 
 % Specify base FBM and metadata table format
-FBM_var_to_search = {'real_time_sec','elapsed_time_min','buoyant_mass_pg','node_deviation_hz','pmt1_mV','pmt2_mV','pmt3_mV','pmt4_mV','pmt5_mV','vol_au','pmt2smr_transit_time_ms'};
+FBM_var_to_search = {'real_time_sec','elapsed_time_min','buoyant_mass_pg','node_deviation_hz','pmt1_mV','pmt2_mV','pmt3_mV','pmt4_mV','pmt5_mV','vol_au','fxm_baseline_mV','pmt2smr_transit_time_ms'};
 instruct_var_to_exclude = {'path','filename'}; % metadata sheet will include all variables from the instruction sheet except variables specified here
 
 % Input UI to specify names for FBM and metadata output

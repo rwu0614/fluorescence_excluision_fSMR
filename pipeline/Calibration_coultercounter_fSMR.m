@@ -1,6 +1,6 @@
 clear all
 close all 
-clc
+% clc
 currentFolder = pwd;
 addpath('plotting_functions\');
 addpath('analysis_functions\');
@@ -127,10 +127,12 @@ while refinement_pass ~= 1
         legend(["Score","Calibration by median","Refined calibration"])
     subplot(1,2,2)
         pre_pass_sample_vol_fL = sample_calibration.vol_au.*refine_calibration_factor;
-        histogram(pre_pass_sample_vol_fL,'BinEdges',[0;target_vol_data.volume_fL]')
+        histogram(pre_pass_sample_vol_fL,'BinEdges',[0;Vol_data.volume_fL]')
         hold on
-        histogram('BinEdges',[0;target_vol_data.volume_fL]','BinCounts',target_vol_data.normalized_count)
-        xlim([vol_cut_low,vol_cut_high])
+        yyaxis right
+        histogram('BinEdges',[0;Vol_data.volume_fL]','BinCounts',Vol_data.count)
+%         xlim([vol_cut_low,vol_cut_high])
+        xlim([0,vol_ceiling])
         xlabel('Volume (fL)')
         set(gca,'Xscale','log')
         legend(["fSMR volume with refined calibration","Coulter Counter"])
@@ -146,8 +148,8 @@ while refinement_pass ~= 1
         out_file_name = ['Calibration_factor_' coulter_sample_name '.txt'];
         writetable(volume_calibration_result,out_file_name, 'delimiter', '\t');
         cd(currentFolder)
+        disp(strcat(coulter_sample_name," ",string(refine_calibration_factor)))
     end
-
 end
 
 
