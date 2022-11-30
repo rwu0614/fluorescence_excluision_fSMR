@@ -70,9 +70,13 @@ for i = 1:length(instruction.path)
             pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
             %initiale pairing
             rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
-        catch
+            err_message = 'none';
+            err_identifier = 'none';
+        catch e
             pmt_log_temp = -999;
             rpt_log_temp = [-999,-999,-999,-999];
+            err_message = e.message;
+            err_identifier = e.identifier;
         end
     sample_path_names = strsplit(instruction.path(i),"\");
     batch_log.path(i) = instruction.path(i);
@@ -83,6 +87,8 @@ for i = 1:length(instruction.path)
     batch_log.pct_dropout(i) = rpt_log_temp(3);
     batch_log.n_paired_cells(i) = rpt_log_temp(4);
     batch_log.processed_time(i) = datetime;
+    batch_log.error_identifier(i) = err_identifier;
+    batch_log.error_message(i) = err_message;
     clc
     % save log
     disp(batch_log)
