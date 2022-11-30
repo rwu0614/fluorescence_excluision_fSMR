@@ -87,8 +87,8 @@ for i = 1:length(instruction.path)
     batch_log.pct_dropout(i) = rpt_log_temp(3);
     batch_log.n_paired_cells(i) = rpt_log_temp(4);
     batch_log.processed_time(i) = datetime;
-    batch_log.error_identifier(i) = err_identifier;
-    batch_log.error_message(i) = err_message;
+    batch_log.error_identifier(i) = string(err_identifier);
+    batch_log.error_message(i) = string(err_message);
     clc
     % save log
     disp(batch_log)
