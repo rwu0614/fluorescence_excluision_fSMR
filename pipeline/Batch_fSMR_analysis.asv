@@ -71,8 +71,7 @@ for i = 1:length(instruction.path)
             %initiale pairing
             rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
         catch
-            pmt_log_temp = -999;
-            rpt_log_temp = [-999,-999,-999,-999];
+            pmt_log_temp = -100
         end
     sample_path_names = strsplit(instruction.path(i),"\");
     batch_log.path(i) = instruction.path(i);
