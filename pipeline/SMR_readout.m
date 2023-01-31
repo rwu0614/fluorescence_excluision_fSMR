@@ -207,7 +207,7 @@ while(1)
     datafull = [datafull datalast]; 
      
     loop= loop+1; %iterate to next data block
-    
+
     % STOP if loop reaches end of main file
     if length(rawdata_smr_current) < datasize
         break

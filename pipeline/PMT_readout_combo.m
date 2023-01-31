@@ -60,17 +60,17 @@ if nargin==0
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = 10; 
-    analysis_params.detect_thresh_pmt(3) = -3;
+    analysis_params.detect_thresh_pmt(2) = -3; 
+    analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.001; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.1;
+    analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     input_dir = varargin{1};
@@ -251,13 +251,13 @@ while(flag==0)
         waitbar(segment_loop/num_segments,progress_bar,{progress_msg.line0,progress_msg.line1,progress_msg.line2,progress_msg.line3});
         pause(0.01)
     end
-    
-%     if segment_loop == 1498
+%     
+%     if segment_loop == 6000
 %         waitbar(1,progress_bar,{'Finishing'});
 %         pause(0.5)
 %         flag = 1;
 %     end
-%     
+    
     segment_loop=segment_loop+1;
     
     if length(rawdata_pmt{1,1}) < analysis_params.datasize
@@ -369,24 +369,29 @@ waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg,report_msg});
 %% generate analysis params txt files 
 cd(input_info.pmt_dir{1})
     writetable(struct2table(analysis_params),'readout_pmt_analysis_params.txt','Delimiter',' ')
+    figure(1)
+    scatter(full_readout_pmt.time_of_detection(:),full_readout_pmt.baseline(:,fxm_channel)...
+        ,5,'filled',"MarkerFaceAlpha",0.5)
+    hold on
+    scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.baseline(cell_pass_ind,fxm_channel)...
+        ,5,'filled',"MarkerFaceAlpha",0.5)
+    xlabel('Time')
+    ylabel('FXM baseline (V)')
+    legend(["All particles","Pass QC"],'Location','southoutside','Orientation','horizontal')
+    print(gcf,'FXM baseline vs time QC check.png','-dpng','-r1200')
 cd(currentFolder)
 
 if nargin ~=0
     delete(progress_bar)
 end
-%%
-figure(1)
-scatter(full_readout_pmt.time_of_detection(:),full_readout_pmt.baseline(:,fxm_channel)...
-    ,5,'filled',"MarkerFaceAlpha",0.5)
-hold on
-scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.baseline(cell_pass_ind,fxm_channel)...
-    ,5,'filled',"MarkerFaceAlpha",0.5)
+%% Place to add random stuff
 
-%%
-figure(2)
-scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal(cell_pass_ind,fxm_channel)...
-    ,5,'filled',"MarkerFaceAlpha",0.5)
-%%
+
+% %%
+% figure(2)
+% scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.signal(cell_pass_ind,fxm_channel)...
+%     ,5,'filled',"MarkerFaceAlpha",0.5)
+
 % scatter(abs(full_readout_pmt.signal(cell_pass_ind,fxm_channel)),abs(full_readout_pmt.amplitude(cell_pass_ind,4)-full_readout_pmt.baseline(cell_pass_ind,4))*1000)
 % hold on
 % tt = (full_readout_pmt.amplitude(cell_pass_ind,4)-(full_readout_pmt.baseline(cell_pass_ind,4)).*...

@@ -47,7 +47,10 @@ instruction = readtable(instruction_path,opts);
 %% Initialize analysis and report parameters
 batch_log = table();
 [instruction_rootdir,~,~] = fileparts(instruction_path);
-batch_log_name = ['Batch_process_log',char(input_info.instruction_filename),'.txt'];
+
+time_stamp = datestr(datetime("now"),"yyyymmddTHHMMSS");
+instruction_path_name = strsplit(input_info.instruction_filename,".");
+batch_log_name = ['Batch_process_log_',char(instruction_path_name(1:end-1)),'_',time_stamp,'.txt'];
 %%
 for i = 1:length(instruction.path)
     warning('off','all')
@@ -63,24 +66,36 @@ for i = 1:length(instruction.path)
     analysis_params_pair.max_time_threshold = str2double(instruction.pairing_window_cutoff_high(i));
     analysis_params_pair.chip_id = char(instruction.chip_id(i));
     analysis_params_pair.hz2pg_factor = str2double(instruction.hz2pg_factor(i));
-        try 
-            %initiate SMR analysis
-            SMR_readout(instruction.path(i));
-            %initiate PMT analysis
-            pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
-            %initiale pairing
-            rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
-            err_message = 'none';
-            err_identifier = 'none';
-        catch e
-            pmt_log_temp = -999;
-            rpt_log_temp = [-999,-999,-999,-999];
-            err_message = e.message;
-            err_identifier = e.identifier;
-        end
+    try 
+        %initiate SMR analysis
+        SMR_readout(instruction.path(i));
+        %initiate PMT analysis
+        pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
+        %initiale pairing
+        rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
+        
+        %Grabe datetime of each sample data collection
+        sample_path = strsplit(instruction.path(i),'\');
+        sample_name = sample_path(end-1);
+        S = dir(fullfile(instruction.path(i) ,sample_name));
+        time_stamp = datestr(S.date,"yyyymmddTHHMMSS");
+        
+        err_message = 'none';
+        err_identifier = 'none';
+    catch e
+        pmt_log_temp = -999;
+        rpt_log_temp = [-999,-999,-999,-999];
+        err_message = e.message;
+        err_identifier = e.identifier;
+        time_stamp = 'none';
+    end
+    
+    
+    %Add to batch process log
     sample_path_names = strsplit(instruction.path(i),"\");
     batch_log.path(i) = instruction.path(i);
     batch_log.sample_ID(i) = sample_path_names(end-1);
+    batch_log.sample_collectiontime(i)=string(time_stamp);
     batch_log.pct_PMT_QCpass(i) = pmt_log_temp;
     batch_log.pct_SMR_paired(i) = rpt_log_temp(1);
     batch_log.pct_PMT_paired(i) = rpt_log_temp(2);

@@ -21,7 +21,8 @@ fprintf('\nGetting paired sample...\n')
 sample_path = [input_info.sample_dir,'\',input_info.sample_filename];
 opts = detectImportOptions(sample_path,'ReadVariableNames',true,'VariableNamingRule','preserve','Delimiter','\t');
 sample = readtable(sample_path,opts);
-
+name_split = strsplit(input_info.sample_filename,'.');   
+sample_name = name_split{end-1};   
 %% Grabbing coulter volume data and creating mock single cell volume array
 ind_size_bin_start  = find(Coulter_data.Var1 == "[#Bindiam]");
 ind_size_bin_end  = find(Coulter_data.Var1 == "[Binunits]");
@@ -139,16 +140,21 @@ while refinement_pass ~= 1
 
     refinement_pass = input("\nDoes volume calibration looks good? Input 1 if yes:");
 
-    %%
+    %% Save to either coulter dir or sample dir
     if refinement_pass ==1
         volume_calibration_result = table();
         volume_calibration_result.calibration_factor_fLoverAU = refine_calibration_factor;
 
-        cd(input_info.coulter_dir)
-        out_file_name = ['Calibration_factor_' coulter_sample_name '.txt'];
+%         cd(input_info.coulter_dir)
+%         out_file_name = ['Calibration_factor_' coulter_sample_name '.txt'];
+%         writetable(volume_calibration_result,out_file_name, 'delimiter', '\t');
+%         cd(currentFolder)
+        
+        cd(input_info.sample_dir)
+        out_file_name = ['Calibration_factor_' sample_name '.txt'];
         writetable(volume_calibration_result,out_file_name, 'delimiter', '\t');
         cd(currentFolder)
-        disp(strcat(coulter_sample_name," ",string(refine_calibration_factor)))
+        disp(strcat(out_file_name," ",string(refine_calibration_factor)))
     end
 end
 

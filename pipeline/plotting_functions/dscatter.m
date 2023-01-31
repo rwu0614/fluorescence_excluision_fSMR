@@ -63,12 +63,13 @@ marker = 's';
 logy = false;
 logx = false;
 filled = true;
+marker_face_alpha=1;
 if nargin > 2
     if rem(nargin,2) == 1
         error('Bioinfo:IncorrectNumberOfArguments',...
             'Incorrect number of arguments to %s.',mfilename);
     end
-    okargs = {'smoothing','bins','plottype','logy','logx','marker','msize','filled'};
+    okargs = {'smoothing','bins','plottype','logy','logx','marker','msize','filled','markerfacealpha'};
     for j=1:2:nargin-2
         pname = varargin{j};
         pval = varargin{j+1};
@@ -107,6 +108,8 @@ if nargin > 2
                     msize = pval;
                 case 8
                     filled = pval;
+                case 9
+                    marker_face_alpha = pval;
             end
         end
     end
@@ -180,9 +183,9 @@ else
             ind = sub2ind(size(F),bin(:,1),bin(:,2));
             col = F(ind);
             if filled
-                h = scatter(X,Y,msize,col,marker,'filled');
+                h = scatter(X,Y,msize,col,marker,'filled','Markerfacealpha',marker_face_alpha);
             else
-                h = scatter(X,Y,msize,col,marker);
+                h = scatter(X,Y,msize,col,marker,'Markerfacealpha',marker_face_alpha);
             end
     end
 
