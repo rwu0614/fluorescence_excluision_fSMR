@@ -63,12 +63,12 @@ if nargin==0
     analysis_params.detect_thresh_pmt(2) = -3; 
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
-    analysis_params.detect_thresh_pmt(5) = 3;
+    analysis_params.detect_thresh_pmt(5) = 10;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.01; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
     analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
