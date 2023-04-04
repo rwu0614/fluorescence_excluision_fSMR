@@ -34,14 +34,25 @@ writetable(sample,out_file_name, 'delimiter', '\t');
 cd(currentFolder)
 
 
-
-
-
-
-
-
-
-
-
-
-
+%%
+% figure('Position',[744,630,213.800000000000,250.200000000000],'Color','w')
+% tiledlayout(2,1,'Padding','tight')
+% 
+% dot_color = [0.43921568627451         0.435294117647059         0.435294117647059];
+% 
+% nexttile
+% scatter(sample.buoyant_mass_pg,sample.volume_fL,3,'filled','MarkerFaceColor',dot_color,'MarkerFaceAlpha',0.25)
+% 
+% set(gca,'XColor','none');
+% ylim([400,2200])
+% xlim([20,80])
+% ylabel('Volume (fL)')
+% nexttile
+% scatter(sample.buoyant_mass_pg,sample.density_gcm3,3,'filled','MarkerFaceColor',dot_color,'MarkerFaceAlpha',0.25)
+% 
+% ylim([1.01,1.1])
+% xlim([20,80])
+% ylabel('Density (g/mL)')
+% xlabel('Buoyant mass (pg)')
+% legend("n="+string(height(sample)),'Location','southeast')
+% legend box off

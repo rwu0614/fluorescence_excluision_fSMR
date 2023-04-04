@@ -31,14 +31,14 @@ instruction = readtable(instruction_path,opts);
     analysis_params_pmt.med_filt_window_size = 3*analysis_params_pmt.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
     analysis_params_pmt.min_distance_btw_peaks = 50; % minimum distance between peaks, for identifying unique peaks
     analysis_params_pmt.uni_peak_range_ext = 5; % number of data points from each side of detection cutoff to be considered as part of the peak
-    analysis_params_pmt.uni_peak_baseline_window_size = 50; % length of data points from each side of detection cutoff to compute the local baseline
+    analysis_params_pmt.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
     
-    analysis_params_pmt.fxm_baseline_choice = 3;
+    analysis_params_pmt.fxm_baseline_choice = 2;
     
     % for upstream compensation
     analysis_params_pmt. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.08; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params_pmt.thresh_baselineDiff_over_sig = 0.3; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params_pmt.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
     analysis_params_pmt.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,16 +68,16 @@ for i = 1:length(instruction.path)
     analysis_params_pair.hz2pg_factor = str2double(instruction.hz2pg_factor(i));
     try 
         %initiate SMR analysis
-        SMR_readout(instruction.path(i));
+%         SMR_readout_2023trap(instruction.path(i));
         %initiate PMT analysis
-        pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
+        pmt_log_temp = PMT_readout_combo_2023trap(instruction.path(i),analysis_params_pmt);
         %initiale pairing
         rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
         
         %Grabe datetime of each sample data collection
-        sample_path = strsplit(instruction.path(i),'\');
-        sample_name = sample_path(end-1);
-        S = dir(fullfile(instruction.path(i) ,sample_name));
+%         sample_path = strsplit(instruction.path(i),'\');
+%         sample_name = sample_path(end-1);
+        S = dir(fullfile(instruction.path(i) ,sprintf('*PMT_time*.bin')));
         time_stamp = datestr(S.date,"yyyymmddTHHMMSS");
         
         err_message = 'none';

@@ -39,7 +39,7 @@ if nargin==0
     analysis_params.med_filt_window_size = 3*analysis_params.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
     analysis_params.min_distance_btw_peaks = 50; % minimum distance between peaks, for identifying unique peaks
     analysis_params.uni_peak_range_ext = 5; % number of data points from each side of detection cutoff to be considered as part of the peak
-    analysis_params.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
+    analysis_params.uni_peak_baseline_window_size = 50; % length of data points from each side of detection cutoff to compute the local baseline
     
     % Below is for choosing which side of the baseline to use when analyzing
     % fluorescence exclusion signal. Fxm baseline is flow rate dependent so
@@ -50,7 +50,7 @@ if nargin==0
     % left baseline -> 1
     % right baseline -> 2
     % average baseline from both side -> 3
-    analysis_params.fxm_baseline_choice = 2;
+    analysis_params.fxm_baseline_choice = 3;
     
     
     % This is for setting detection threshold for each PMT channel,
@@ -63,12 +63,12 @@ if nargin==0
     analysis_params.detect_thresh_pmt(2) = -3; 
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
-    analysis_params.detect_thresh_pmt(5) = 3;
+    analysis_params.detect_thresh_pmt(5) = 10;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.08; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
     analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -252,7 +252,7 @@ while(flag==0)
         pause(0.01)
     end
 %     
-%     if segment_loop == 6000
+%     if segment_loop == 2000
 %         waitbar(1,progress_bar,{'Finishing'});
 %         pause(0.5)
 %         flag = 1;

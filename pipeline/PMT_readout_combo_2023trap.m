@@ -31,7 +31,7 @@ if nargin==0
 % Optimize using following parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     analysis_params.Peak_length = 100; % estimated peak length
-    analysis_params.datasize = 2e4;   % establish a segment size (~32Mbytes)
+    analysis_params.datasize = 8e4;   % establish a segment size (~32Mbytes)
     
     analysis_params.Baseline_rough_cutoff = -20; % default is -20 for populational fSMR experiments where light source is always on
     analysis_params.med_filt_length = 5; %full PMT data median filter window size, default 50
@@ -39,7 +39,7 @@ if nargin==0
     analysis_params.med_filt_window_size = 3*analysis_params.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
     analysis_params.min_distance_btw_peaks = 50; % minimum distance between peaks, for identifying unique peaks
     analysis_params.uni_peak_range_ext = 5; % number of data points from each side of detection cutoff to be considered as part of the peak
-    analysis_params.uni_peak_baseline_window_size = 50; % length of data points from each side of detection cutoff to compute the local baseline
+    analysis_params.uni_peak_baseline_window_size = 100; % length of data points from each side of detection cutoff to compute the local baseline
     
     % Below is for choosing which side of the baseline to use when analyzing
     % fluorescence exclusion signal. Fxm baseline is flow rate dependent so
@@ -50,7 +50,7 @@ if nargin==0
     % left baseline -> 1
     % right baseline -> 2
     % average baseline from both side -> 3
-    analysis_params.fxm_baseline_choice = 3;
+    analysis_params.fxm_baseline_choice = 2;
     
     
     % This is for setting detection threshold for each PMT channel,
@@ -60,7 +60,7 @@ if nargin==0
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = ; 
+    analysis_params.detect_thresh_pmt(2) = -3; 
     analysis_params.detect_thresh_pmt(3) = 10;
     analysis_params.detect_thresh_pmt(4) = 10;
     analysis_params.detect_thresh_pmt(5) = 10;
@@ -68,7 +68,7 @@ if nargin==0
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.08; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.3; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
     analysis_params.thresh_base_height_range = 0.05;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -271,7 +271,8 @@ end
 %% Quality check to remove low-quality signals
 if fxm_mode == 1
     non_nan_ind = find(~isnan(full_readout_pmt.baseline(:,fxm_channel)));
-    base_med = median(full_readout_pmt.baseline(non_nan_ind(1:round(length(non_nan_ind)*0.3)),fxm_channel));
+    base_med = median(full_readout_pmt.baseline(non_nan_ind(round(length(non_nan_ind)*0.5):round(length(non_nan_ind)*0.99)),fxm_channel));
+%     base_med = mean([1.48,1.52]);
     all_base_med_norm = abs(full_readout_pmt.baseline(:,fxm_channel)-base_med);
     base_amp_pass_ind = find(all_base_med_norm < base_med*analysis_params.thresh_base_height_range);
     all_cell_baselineDiff_over_sig = abs(full_readout_pmt.baseline_left_height(:,fxm_channel)-full_readout_pmt.baseline_right_height(:,fxm_channel))...

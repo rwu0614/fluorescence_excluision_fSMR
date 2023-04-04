@@ -69,11 +69,11 @@ end
 
 % seek data for current segement, datatype int is 8bytes
 
-fseek(pmt_file_ID(1),200000, 'bof');    
-rawdata_pmt= fread(pmt_file_ID(1),200000,'float64=>double');
+fseek(pmt_file_ID(1),2000000, 'bof');    
+rawdata_pmt= fread(pmt_file_ID(1),2000000,'float64=>double');
 
-fseek(time_file_ID,200000 ,'bof');
-rawdata_time_pmt = fread(time_file_ID,200000,'float64=>double');
+fseek(time_file_ID,2000000 ,'bof');
+rawdata_time_pmt = fread(time_file_ID,2000000,'float64=>double');
 
 %%
 rawdata_smr = fread(smr_file_ID, 'int32','b')/2^32;
@@ -85,24 +85,68 @@ rawdata_smr(rawdata_smr <= -pi/2) = rawdata_smr(rawdata_smr <= -pi/2) + pi;
 rawdata_smr = rawdata_smr*10000/(2*pi);
 fclose(smr_file_ID);
 
-rawdata_smr_time = fread(smr_time_file_ID,'float64=>double');
-rawdata_smr_time(1)=[];
+rawdata_smr_time_og = fread(smr_time_file_ID,'float64=>double');
+rawdata_smr_time_og(1)=[];
 %% Interpolting pmt time variable to sync up with smr time
 pmt_time_diff = diff(rawdata_time_pmt);
 pmt_time_stamp_ind = find(pmt_time_diff~=0);
 time_x_ind = 1:1:length(rawdata_time_pmt);
-pmt_time_interp = interp1(time_x_ind(pmt_time_stamp_ind),rawdata_time_pmt(pmt_time_stamp_ind),time_x_ind);
-pmt_time_interp(1) = pmt_time_interp(2);
-pmt_time_interp(end-5:end) = pmt_time_interp(end-6) ;
+pmt_time_interp_og = interp1(time_x_ind(pmt_time_stamp_ind),rawdata_time_pmt(pmt_time_stamp_ind),time_x_ind);
+pmt_time_interp_og(1) = pmt_time_interp_og(2);
+pmt_time_interp_og(end-5:end) = pmt_time_interp_og(end-6) ;
+pmt_start_time = pmt_time_interp_og(30);
+pmt_time_interp = pmt_time_interp_og-pmt_start_time;
+rawdata_smr_time = rawdata_smr_time_og-pmt_start_time;
 %% Visualize smr and pmt signal together to locate target cell
-figure(1)
-initial_ind = 1:1:200000;
-plot(rawdata_smr_time(200000:1:300000),rawdata_smr(200000:1:300000))
-ylim([-500,400])
-hold on
-yyaxis right
-plot(pmt_time_interp(initial_ind),rawdata_pmt(initial_ind))
-ylim([0,5])
+figure('Position',[594.600000000000,729,948.800000000000,176],'Color','w')
+tiledlayout(2,1,'Padding','compact')
+initial_ind = 100000:1:800000;
+smr_baseline = 153;
+time_offset_plot = 4;
+smr_color = [0.980392156862745         0.541176470588235         0.352941176470588];
+pmt_color = [0.537254901960784          0.72156862745098         0.301960784313725];
+nexttile
+
+plot(rawdata_smr_time(100000:1:200000)-time_offset_plot,rawdata_smr(100000:1:200000)-smr_baseline,'Color',smr_color);
+ylim([-5,250])
+xlim([0,5])
+ylabel('\Delta SMR frequency (Hz)')
+set(gca,'XColor','none');
+box off
+nexttile
+plot(pmt_time_interp(initial_ind)-time_offset_plot,rawdata_pmt(initial_ind),'Color',pmt_color)
+ylabel('Fluorescence (V)')
+ylim([0.93,1.16])
+xlim([0,5])
+box off
+xlabel('Time (second)')
+
+%% Visualize smr and pmt signal together to locate target cell
+figure('Position',[594.600000000000,673.800000000000,227.200000000000,231.200000000000],'Color','w')
+tiledlayout(2,1,'Padding','compact')
+initial_ind = 100000:1:800000;
+smr_baseline = 153;
+time_offset_plot = 4;
+smr_color = [0.980392156862745         0.541176470588235         0.352941176470588];
+pmt_color = [0.537254901960784          0.72156862745098         0.301960784313725];
+
+xlim_range = [1.92,1.96];
+
+nexttile
+
+plot(rawdata_smr_time(100000:1:200000)-time_offset_plot,rawdata_smr(100000:1:200000)-smr_baseline,'Color',smr_color);
+ylim([-5,120])
+xlim(xlim_range)
+%ylabel('\Delta SMR frequency (Hz)')
+set(gca,'XColor','none');
+box off
+nexttile
+plot(pmt_time_interp(initial_ind)-time_offset_plot,rawdata_pmt(initial_ind),'Color',pmt_color)
+%ylabel('Fluorescence (V)')
+ylim([1.04,1.16])
+xlim(xlim_range)
+box off
+xlabel('Time (second)')
 %% Plot example data
 fig = figure;
 left_color = [0 0.4470 0.7410];
