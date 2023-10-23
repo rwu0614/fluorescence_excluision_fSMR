@@ -7,7 +7,7 @@ if nargin ==0
 else
     input_dir = varargin{1};
     analysis_params_pair = varargin{2};
-    output_dir = varagin(3);
+    output_dir = varargin{3};
 end
 
 currentFolder = pwd;

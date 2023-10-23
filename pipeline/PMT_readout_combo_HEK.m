@@ -39,7 +39,7 @@ if nargin==0
     analysis_params.med_filt_window_size = 3*analysis_params.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
     analysis_params.min_distance_btw_peaks = 200; % minimum distance between peaks, for identifying unique peaks
     analysis_params.uni_peak_range_ext = 20; % number of data points from each side of detection cutoff to be considered as part of the peak
-    analysis_params.uni_peak_baseline_window_size = 500; % length of data points from each side of detection cutoff to compute the local baseline
+    analysis_params.uni_peak_baseline_window_size = 200; % length of data points from each side of detection cutoff to compute the local baseline
     
     % Below is for choosing which side of the baseline to use when analyzing
     % fluorescence exclusion signal. Fxm baseline is flow rate dependent so
@@ -76,7 +76,7 @@ else
     input_dir = varargin{1};
     batch_params = varargin{2};
     analysis_params = batch_params;
-    output_dir = varagin(3);
+    output_dir = varargin{3};
 end
 %% ---------------- Run mode and upstream compensation determination ----------- %%
 % To detemine if the user wants to analyze data including fluorescence
