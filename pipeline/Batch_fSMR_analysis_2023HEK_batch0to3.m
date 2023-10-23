@@ -70,7 +70,7 @@ for i = 1:length(instruction.path)
         %initiate SMR analysis
         SMR_readout(instruction.path(i));
         %initiate PMT analysis
-        pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
+        pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt,instruction.output_path(i));
         %initiale pairing
         rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
         

@@ -226,14 +226,14 @@ if nargin ~=0
     
     % create pairing window plot
     figure('color','w','position',[669,593,647,285])
-    plot_trace_mode_offset = 10;
+    plot_trace_mode_offset = 20;
     histogram(trace,'BinWidth',0.5)
     hold on
     xline(min_time_threshold,'Color','r')
     hold on
     xline(max_time_threshold,'Color','r')
     if abs(mode(trace))<100
-        xlim([min_time_threshold-plot_trace_mode_offset,max_time_threshold+plot_trace_mode_offset])
+        xlim([mode(trace)-plot_trace_mode_offset,mode(trace)+plot_trace_mode_offset])
     else
         xlim([-80,80])
     end

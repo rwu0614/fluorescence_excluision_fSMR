@@ -69,11 +69,7 @@ for i = 1:length(instruction.path)
     try 
         %initiate SMR analysis
         SMR_readout(instruction.path(i));
-        %initiate PMT analysis
-        pmt_log_temp = PMT_readout_combo(instruction.path(i),analysis_params_pmt);
-        %initiale pairing
-        rpt_log_temp = Readout_pairing(instruction.path(i),analysis_params_pair);
-        
+
         %Grabe datetime of each sample data collection
         sample_path = strsplit(instruction.path(i),'\');
         sample_name = sample_path(end-1);
@@ -96,11 +92,6 @@ for i = 1:length(instruction.path)
     batch_log.path(i) = instruction.path(i);
     batch_log.sample_ID(i) = sample_path_names(end-1);
     batch_log.sample_collectiontime(i)=string(time_stamp);
-    batch_log.pct_PMT_QCpass(i) = pmt_log_temp;
-    batch_log.pct_SMR_paired(i) = rpt_log_temp(1);
-    batch_log.pct_PMT_paired(i) = rpt_log_temp(2);
-    batch_log.pct_dropout(i) = rpt_log_temp(3);
-    batch_log.n_paired_cells(i) = rpt_log_temp(4);
     batch_log.processed_time(i) = datetime;
     batch_log.error_identifier(i) = string(err_identifier);
     batch_log.error_message(i) = string(err_message);

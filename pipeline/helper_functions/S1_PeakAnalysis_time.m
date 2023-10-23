@@ -94,7 +94,7 @@ xdata = [1:length(ydata)]';
 analysis_params.diff_threshold = 0.005;      % Find extremely flat part of curve (sys1)
 analysis_params.med_filt_wd = 200;           % window of median filter, which removes the flat part in the anti-node
 analysis_params.bs_dev_thres = 0.5;         % baseline dev_threshold; threshold used to remove the flat part in the anti-node
-analysis_params.unqPeakDist =150;            % distance over which is a unique 2nd mode peaks,default 200
+analysis_params.unqPeakDist =300;            % distance over which is a unique 2nd mode peaks,default 200
 analysis_params.offset_input = 5;             % baseline offset to select for peaks
 %%%%%%%% USER ADJUSTABLE (Below is assuming 400 data points per transit) %%%%%%%%
 analysis_params.edgethres = 0.12;               % choose the first point left/right of the secondary peaks 40% percent of the average baseline freqvalue

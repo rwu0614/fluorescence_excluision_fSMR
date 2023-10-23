@@ -30,16 +30,16 @@ if nargin==0
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Optimize using following parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    analysis_params.Peak_length = 100; % estimated peak length
+    analysis_params.Peak_length = 400; % estimated peak length
     analysis_params.datasize = 2e4;   % establish a segment size (~32Mbytes)
     
     analysis_params.Baseline_rough_cutoff = -20; % default is -20 for populational fSMR experiments where light source is always on
     analysis_params.med_filt_length = 5; %full PMT data median filter window size, default 50
     analysis_params.moving_average_window_size = 5; %full PMT data moving-average filter window size, default 5    
     analysis_params.med_filt_window_size = 3*analysis_params.Peak_length ; % baseline median filter window size, sampling distance for extrapolating flat baseline   
-    analysis_params.min_distance_btw_peaks = 50; % minimum distance between peaks, for identifying unique peaks
-    analysis_params.uni_peak_range_ext = 5; % number of data points from each side of detection cutoff to be considered as part of the peak
-    analysis_params.uni_peak_baseline_window_size = 50; % length of data points from each side of detection cutoff to compute the local baseline
+    analysis_params.min_distance_btw_peaks = 200; % minimum distance between peaks, for identifying unique peaks
+    analysis_params.uni_peak_range_ext = 20; % number of data points from each side of detection cutoff to be considered as part of the peak
+    analysis_params.uni_peak_baseline_window_size = 500; % length of data points from each side of detection cutoff to compute the local baseline
     
     % Below is for choosing which side of the baseline to use when analyzing
     % fluorescence exclusion signal. Fxm baseline is flow rate dependent so
@@ -59,23 +59,24 @@ if nargin==0
     % *************** IMPORTANT******************
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
-    analysis_params.detect_thresh_pmt(1) = 10; 
-    analysis_params.detect_thresh_pmt(2) = ; 
-    analysis_params.detect_thresh_pmt(3) = 10;
-    analysis_params.detect_thresh_pmt(4) = 10;
-    analysis_params.detect_thresh_pmt(5) = 10;
+    analysis_params.detect_thresh_pmt(1) = 30; 
+    analysis_params.detect_thresh_pmt(2) = -2.5; 
+    analysis_params.detect_thresh_pmt(3) = 30;
+    analysis_params.detect_thresh_pmt(4) = 30;
+    analysis_params.detect_thresh_pmt(5) = 30;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
-    analysis_params.thresh_baselineDiff_over_sig = 0.08; % cutoff for left-right baseline height difference normalized by the signal amplitude
+    analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.05;
+    analysis_params.thresh_base_height_range = 0.03;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     input_dir = varargin{1};
     batch_params = varargin{2};
     analysis_params = batch_params;
+    output_dir = varagin(3);
 end
 %% ---------------- Run mode and upstream compensation determination ----------- %%
 % To detemine if the user wants to analyze data including fluorescence
@@ -366,7 +367,7 @@ PMT_readout_report_v1(report_dir,input_info,input_info.pmt_dir(1),sample_name, a
 report_msg = 'Generating report... done';
 waitbar(1,progress_bar,{QC_msg,upComp_msg,downComp_msg,output_msg,report_msg});
 
-%% generate analysis params txt files 
+%% generate analysis params txt files and baseline fluctuation report plot
 cd(input_info.pmt_dir{1})
     writetable(struct2table(analysis_params),'readout_pmt_analysis_params.txt','Delimiter',' ')
     figure(1)
@@ -380,6 +381,20 @@ cd(input_info.pmt_dir{1})
     legend(["All particles","Pass QC"],'Location','southoutside','Orientation','horizontal')
     print(gcf,'FXM baseline vs time QC check.png','-dpng','-r1200')
 cd(currentFolder)
+if nargin ~=0
+    cd(output_dir)
+        figure('color','w','Position',[744,630,441,353])
+        scatter(full_readout_pmt.time_of_detection(:),full_readout_pmt.baseline(:,fxm_channel)...
+            ,5,'filled',"MarkerFaceAlpha",0.5)
+        hold on
+        scatter(full_readout_pmt.time_of_detection(cell_pass_ind),full_readout_pmt.baseline(cell_pass_ind,fxm_channel)...
+            ,5,'filled',"MarkerFaceAlpha",0.5)
+        xlabel('Time')
+        ylabel('FXM baseline (V)')
+        legend(["All particles","Pass QC"],'Location','southoutside','Orientation','horizontal')
+        print(gcf,'FXM baseline vs time QC check.png','-dpng','-r1200')
+    cd(currentFolder)
+end
 
 if nargin ~=0
     delete(progress_bar)

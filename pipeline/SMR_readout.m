@@ -144,7 +144,9 @@ end
 % This is for passing parameters to downstream functions
 analysisparams.analysismode = analysismode;       
 analysisparams.dispprogress = dispprogress;
-
+analysisparams_screen = analysisparams;
+analysisparams_screen.analysismode = 1;       
+analysisparams_screen.dispprogress = 0;
 % Set real-time reporting screensize
 if dispprogress == 1
     scrsize = get(0, 'Screensize');
@@ -166,7 +168,7 @@ datafull = zeros(13,1); %total of 13 features
 loop=0;
 
 %Initialize estimated number of datapoints want to test
-estimated_datapoints = 80:10:300;
+estimated_datapoints = 100:10:450;
 
 datasizetest = 5e5;
 num_peaks_compiled = [];
@@ -177,13 +179,12 @@ for i = 1:length(estimated_datapoints)
     % Creat a column vector of the time data in the current block being analyzed 
     rawdata_smr_time_current_test = rawdata_smr_time([loop*datasizetest+1:min(length(rawdata_smr), (loop+1)*datasizetest)]);
     % Detect peaks from current block
-    datalasttest = S1_PeakAnalysis_time(-rawdata_smr_current_test', rawdata_smr_time_current_test, datatest, loop, analysisparams, estimated_datapoints(i));
+    datalasttest = S1_PeakAnalysis_time(-rawdata_smr_current_test', rawdata_smr_time_current_test, datatest, loop, analysisparams_screen, estimated_datapoints(i));
     num_peaks_compiled(i) = length(datalasttest)./3;
 end
 
 [~,optimized_idx] = max(num_peaks_compiled);
 estimated_datapoints_best = estimated_datapoints(optimized_idx);
-
 % estimated_datapoints_best = 150;
 
 while(1)
@@ -213,6 +214,7 @@ while(1)
         break
     end
 end
+
 analysis_params.estimated_datapoints_optimized = estimated_datapoints_best;
 %=================================================================%
 %%
