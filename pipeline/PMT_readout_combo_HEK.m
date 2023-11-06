@@ -1,4 +1,4 @@
-function pass_rate = PMT_readout_combo(varargin)
+function pass_rate = PMT_readout_combo_HEK(varargin)
 % input should be empty for one-time execution on a single sample. For
 % batch analysis, use PMT_readout_combo(input_directory,batch_analysis_params)
 % batch_analysis_params should have the same field as the analysis_params
@@ -60,17 +60,18 @@ if nargin==0
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 30; 
-    analysis_params.detect_thresh_pmt(2) = -2.5; 
-    analysis_params.detect_thresh_pmt(3) = 30;
+    analysis_params.detect_thresh_pmt(2) = 3; 
+    analysis_params.detect_thresh_pmt(3) = -3;
     analysis_params.detect_thresh_pmt(4) = 30;
-    analysis_params.detect_thresh_pmt(5) = 30;
+    analysis_params.detect_thresh_pmt(5) = 3;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
     % For signal QC filtering
     analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params.thresh_base_height_range = 0.03;
+    analysis_params.fxm_qc_basemed_range = [0,0.3]; % select fractional range (within [0,1]) of all signals to calculate for median baseline height for exclusion consideration of thresh_base_height_range
+    analysis_params.thresh_base_height_range = 0.02;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     input_dir = varargin{1};
@@ -272,7 +273,7 @@ end
 %% Quality check to remove low-quality signals
 if fxm_mode == 1
     non_nan_ind = find(~isnan(full_readout_pmt.baseline(:,fxm_channel)));
-    base_med = median(full_readout_pmt.baseline(non_nan_ind(1:round(length(non_nan_ind)*0.3)),fxm_channel));
+    base_med = median(full_readout_pmt.baseline(non_nan_ind(max(1,round(length(non_nan_ind)*analysis_params.fxm_qc_basemed_range(1))):round(length(non_nan_ind)*analysis_params.fxm_qc_basemed_range(2))),fxm_channel));
     all_base_med_norm = abs(full_readout_pmt.baseline(:,fxm_channel)-base_med);
     base_amp_pass_ind = find(all_base_med_norm < base_med*analysis_params.thresh_base_height_range);
     all_cell_baselineDiff_over_sig = abs(full_readout_pmt.baseline_left_height(:,fxm_channel)-full_readout_pmt.baseline_right_height(:,fxm_channel))...
