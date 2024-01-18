@@ -70,7 +70,7 @@ if nargin==0
     % For signal QC filtering
     analysis_params.thresh_baselineDiff_over_sig = 0.05; % cutoff for left-right baseline height difference normalized by the signal amplitude
     analysis_params.thresh_base_slope = 2*10^-3; % cutoff for left-right baseline slopes
-    analysis_params.fxm_qc_basemed_range = [0,0.3]; % select fractional range (within [0,1]) of all signals to calculate for median baseline height for exclusion consideration of thresh_base_height_range
+    analysis_params.fxm_qc_basemed_range = [0,0.5]; % select fractional range (within [0,1]) of all signals to calculate for median baseline height for exclusion consideration of thresh_base_height_range
     analysis_params.thresh_base_height_range = 0.02;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else

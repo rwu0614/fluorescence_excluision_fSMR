@@ -60,10 +60,10 @@ if nargin==0
     % For fluorescence exclusion threshold, always use a negative value,
     % and still postitive threshold for downstream channels
     analysis_params.detect_thresh_pmt(1) = 30; 
-    analysis_params.detect_thresh_pmt(2) = 3; 
-    analysis_params.detect_thresh_pmt(3) = -3;
+    analysis_params.detect_thresh_pmt(2) = 30; 
+    analysis_params.detect_thresh_pmt(3) = 3;
     analysis_params.detect_thresh_pmt(4) = 30;
-    analysis_params.detect_thresh_pmt(5) = 3;
+    analysis_params.detect_thresh_pmt(5) = 30;
     
     % for upstream compensation
     analysis_params. upstream_compen = 0; % 0- no compensation from upstream channel of fxm channel to initialize
