@@ -109,35 +109,37 @@ for j = 1:length(smr_timestamp)
 end
 
 %%
-figure('OuterPosition',[0.2*scrsize(3) 0.3*scrsize(4) 0.6*scrsize(3) 0.5*scrsize(4)]);
-subplot(2,1,1)
-%[counts,edges] = histcounts(trace,2*window);
-[counts,edges] = histcounts(trace,500);
-x = edges(1:end-1);
-y = zeros(1,length(x));
-col = counts;  % This is the color, vary with x in this case.
 
-surface([x;x],[y;y],[col;col],...
-        'facecol','no',...
-        'edgecol','interp',...
-        'linew',100);
-xlim([-800,800])
-xlabel('Delta T from PMT to SMR signals (ms)')
-set(gca, 'YTick', [])
-c=colorbar;
-set(get(c,'title'),'string','PMT occurrence','Rotation',0);
+if nargin ==0
+    figure('OuterPosition',[0.2*scrsize(3) 0.3*scrsize(4) 0.6*scrsize(3) 0.5*scrsize(4)]);
+    subplot(2,1,1)
+    %[counts,edges] = histcounts(trace,2*window);
+    [counts,edges] = histcounts(trace,500);
+    x = edges(1:end-1);
+    y = zeros(1,length(x));
+    col = counts;  % This is the color, vary with x in this case.
 
-subplot(2,1,2)
-plot_trace_mode_offset = 15;
-histogram(trace,'BinWidth',0.5)
-if abs(mode(trace))<100
-    xlim([mode(trace)-plot_trace_mode_offset,mode(trace)+plot_trace_mode_offset])
-else
-    xlim([-50,50])
+    surface([x;x],[y;y],[col;col],...
+            'facecol','no',...
+            'edgecol','interp',...
+            'linew',100);
+    xlim([-800,800])
+    xlabel('Delta T from PMT to SMR signals (ms)')
+    set(gca, 'YTick', [])
+    c=colorbar;
+    set(get(c,'title'),'string','PMT occurrence','Rotation',0);
+
+    subplot(2,1,2)
+    plot_trace_mode_offset = 15;
+    histogram(trace,'BinWidth',0.5)
+    if abs(mode(trace))<100
+        xlim([mode(trace)-plot_trace_mode_offset,mode(trace)+plot_trace_mode_offset])
+    else
+        xlim([-50,50])
+    end
+    xlabel('Delta T from PMT to SMR signals (ms)')
+    ylabel('Counts')
 end
-xlabel('Delta T from PMT to SMR signals (ms)')
-ylabel('Counts')
-
 %% Pairing
 
 %set window limit for PMT-SMR pairing
@@ -241,7 +243,7 @@ if nargin ~=0
     ylabel('Counts')
 
     out_file_name = [sample_name ' pairing window' '.png'];
-    print(gcf,out_file_name,'-dpng','-d1200')
+    print(gcf,out_file_name,'-dpng','-r1200')
     cd(currentFolder)
 end
 
