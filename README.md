@@ -1,5 +1,5 @@
-# fluorescence_excluision_fSMR
-Analysis pipeline for raw fSMR data from fluorescence exclusion experiments
+# fluorescence_excluision_fxSMR
+Analysis pipeline for raw fxSMR data from fluorescence exclusion experiments
 
 ## Update on 2021-10-22
 1) PMT_readout_combo.m file is compatible with or without fluorescence exclusion signals. User can use this to analyze samples purely labeled with positive fluorescence markers. For details please see then openning description on thresholding in the .m file
